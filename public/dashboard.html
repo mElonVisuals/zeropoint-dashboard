@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroPoint Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A; /* Deepest dark background, matching index.html */
+            color: #EAEAEA; /* Light text */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Animated Background Gradients (from index.html) */
+        .background-gradient-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: radial-gradient(circle at 15% 15%, rgba(95, 158, 160, 0.08) 0%, transparent 60%);
+            animation: moveGradientTop 30s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: -2;
+            filter: blur(120px);
+        }
+        .background-gradient-bottom {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 60%;
+            background: radial-gradient(circle at 85% 85%, rgba(70, 130, 180, 0.08) 0%, transparent 60%);
+            animation: moveGradientBottom 30s infinite alternate-reverse ease-in-out;
+            pointer-events: none;
+            z-index: -2;
+            filter: blur(120px);
+        }
+
+        @keyframes moveGradientTop {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(10%, 10%) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes moveGradientBottom {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-10%, -10%) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Subtle Noise Overlay (from index.html) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
+            background-size: 100px;
+            opacity: 0.01;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Starfield Effect (from index.html) */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -3;
+            background: transparent;
+            animation: twinkle 150s linear infinite;
+        }
+
+        .starfield::before, .starfield::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 1px;
+            background: white;
+            border-radius: 50%;
+            box-shadow:
+                -200px 100px #fff, 150px 200px #fff, 300px 50px #fff, 400px 250px #fff, -100px 300px #fff,
+                50px 400px #fff, 250px 150px #fff, 350px 350px #fff, -50px 50px #fff, 100px 280px #fff,
+                -300px 180px #fff, 200px 450px #fff, 450px 100px #fff, -250px 220px #fff, 180px 380px #fff,
+                -400px 20px #fff, 500px 120px #fff, -150px 480px #fff, 320px -50px #fff, 80px 520px #fff,
+                -280px 350px #fff, 120px -80px #fff, 550px 280px #fff, -350px 100px #fff, 220px 420px #fff,
+                -10px 10px #eee, 10px 20px #eee, 30px 5px #eee, 40px 25px #eee, -10px 30px #eee,
+                5px 40px #eee, 25px 15px #eee, 35px 35px #eee, -5px 5px #eee, 10px 28px #eee,
+                -30px 18px #eee, 20px 45px #eee, 45px 10px #eee, -25px 22px #eee, 18px 38px #eee,
+                -80px 120px #ddd, 120px 80px #ddd, 280px 180px #ddd, 380px 20px #ddd, -150px 250px #ddd,
+                70px 350px #ddd, 220px 100px #ddd, 320px 300px #ddd, -20px 200px #ddd, 150px 420px #ddd,
+                -220px 50px #ddd, 100px 20px #ddd, 400px 300px #ddd, -80px 380px #ddd, 250px 70px #ddd,
+                -600px 50px #ccc, 700px 300px #ccc, -400px 600px #ccc, 800px 100px #ccc, -200px 700px #ccc,
+                100px 800px #ccc, 600px 400px #ccc, -500px 200px #ccc, 900px 500px #ccc, -300px 900px #ccc,
+                -750px 250px #bbb, 850px 600px #bbb, -550px 800px #bbb, 950px 350px #bbb, -450px 1000px #bbb,
+                250px 950px #bbb, 700px 750px #bbb, -650px 450px #bbb, 1000px 850px #bbb, -350px 1100px #bbb;
+        }
+
+        @keyframes twinkle {
+            0% { transform: translate(0, 0); opacity: 1; }
+            25% { transform: translate(1%, -1%); opacity: 0.9; }
+            50% { transform: translate(0, 0); opacity: 1; }
+            75% { transform: translate(-1%, 1%); opacity: 0.9; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+
+        /* Main Container Background & Border */
+        .container-bg {
+            background-color: #1A1A1A; /* Darker background for cards, matching index.html card */
+            border: 1px solid #3A3A3A; /* Subtle border */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+        }
+        /* Header Background */
+        header {
+            background-color: #1A1A1A; /* Darker header background */
+            border-bottom: 1px solid #3A3A3A; /* Subtle border */
+        }
+        /* Logout Button */
+        .btn-logout {
+            background-color: #DC2626; /* Red-600 */
+            transition: background-color 0.3s ease;
+        }
+        .btn-logout:hover {
+            background-color: #B91C1C; /* Red-700 */
+        }
+        /* Accent Colors */
+        .accent-color {
+            color: #5F9EA0; /* Cadet Blue */
+        }
+        .accent-bg {
+            background-color: #5F9EA0; /* Cadet Blue */
+        }
+        .accent-border {
+            border-color: #5F9EA0;
+        }
+        /* Card Styling for settings sections */
+        .card {
+            background-color: #0A0A0A; /* Even darker card background */
+            border: 1px solid #3A3A3A;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        /* Input Fields */
+        .input-field {
+            background-color: #282828; /* Darker input field */
+            border: 1px solid #555;
+            color: #EAEAEA;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            width: 100%;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #5F9EA0;
+            box-shadow: 0 0 0 2px rgba(95, 158, 160, 0.5);
+        }
+        /* Guild Card in Sidebar */
+        .guild-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            border: 1px solid transparent; /* Default transparent border */
+        }
+        .guild-card:hover {
+            transform: translateY(-3px);
+            background-color: #3A3A3A;
+        }
+        .guild-card.selected {
+            background-color: #4A4A4A;
+            border-color: #5F9EA0; /* Accent border for selected */
+            box-shadow: 0 0 0 2px rgba(95, 158, 160, 0.5);
+        }
+        /* Save Button */
+        .save-button {
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .save-button:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+        .save-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: translateY(0);
+        }
+        /* Status Message */
+        .status-message {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .status-message.show {
+            opacity: 1;
+        }
+        .status-success {
+            color: #4CAF50; /* Green */
+        }
+        .status-error {
+            color: #F44336; /* Red */
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1A1A1A;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5F9EA0; /* Cadet Blue accent */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4682B4; /* Steel Blue on hover */
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="background-gradient-top"></div>
+    <div class="background-gradient-bottom"></div>
+    <div class="starfield"></div>
+
+    <header class="w-full bg-[#1A1A1A] p-4 shadow-md flex justify-between items-center z-10">
+        <div class="flex items-center">
+            <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Logo" class="w-10 h-10 rounded-full mr-3">
+            <h1 class="text-2xl font-bold text-white">ZeroPoint Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-gray-300">Logged in as <span id="username" class="font-semibold text-indigo-400"></span></span>
+            <a href="/logout" class="px-4 py-2 text-sm font-medium rounded-md btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col md:flex-row p-6 gap-6 max-w-7xl mx-auto w-full relative z-10">
+        <!-- Guild Selection Sidebar -->
+        <aside class="w-full md:w-1/4 bg-[#1A1A1A] p-4 rounded-lg shadow-lg container-bg h-full overflow-y-auto">
+            <h2 class="text-xl font-semibold mb-4 text-white">Your Servers</h2>
+            <p class="text-gray-400 text-sm mb-4">Select a server to manage bot settings.</p>
+            <p id="guildsHeader" class="text-gray-300 mt-4 hidden">Your Guilds (where bot is present):</p>
+            <ul id="guildList" class="space-y-2">
+                <!-- Guilds will be populated here -->
+                <li class="text-gray-400">Loading guilds...</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area (Dashboard Settings) -->
+        <section class="flex-1 bg-[#1A1A1A] p-6 rounded-lg shadow-lg container-bg">
+            <h2 class="text-xl font-semibold mb-6 text-white">Bot Settings for <span id="selectedGuildName" class="accent-color">No Server Selected</span></h2>
+
+            <div id="settingsContent" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- General Settings Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">General Settings</h3>
+                        <div class="mb-4">
+                            <label for="botPrefix" class="block text-gray-400 text-sm font-bold mb-2">Bot Prefix</label>
+                            <input type="text" id="botPrefix" class="input-field" placeholder="e.g., !">
+                        </div>
+                        <div class="mb-4">
+                            <label for="defaultRole" class="block text-gray-400 text-sm font-bold mb-2">Default New Member Role ID</label>
+                            <input type="text" id="defaultRole" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <button id="saveGeneralSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save General Settings</button>
+                        <p id="generalStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Welcome Message Settings Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Welcome Message</h3>
+                        <div class="mb-4">
+                            <label for="welcomeChannel" class="block text-gray-400 text-sm font-bold mb-2">Welcome Channel ID</label>
+                            <input type="text" id="welcomeChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <div class="mb-4">
+                            <label for="welcomeMessage" class="block text-gray-400 text-sm font-bold mb-2">Welcome Message</label>
+                            <textarea id="welcomeMessage" class="input-field h-24 resize-y" placeholder="Welcome {user}!"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="welcomeDM" class="block text-gray-400 text-sm font-bold mb-2">Send Welcome DM?</label>
+                            <input type="checkbox" id="welcomeDM" class="form-checkbox h-5 w-5 text-accent rounded">
+                        </div>
+                        <button id="saveWelcomeSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Welcome Settings</button>
+                        <p id="welcomeStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Logging Settings Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Logging Settings</h3>
+                        <div class="mb-4">
+                            <label for="logChannel" class="block text-gray-400 text-sm font-bold mb-2">Log Channel ID</label>
+                            <input type="text" id="logChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <div class="mb-4">
+                            <label for="logMessages" class="block text-gray-400 text-sm font-bold mb-2">Log Message Edits/Deletes?</label>
+                            <input type="checkbox" id="logMessages" class="form-checkbox h-5 w-5 text-accent rounded">
+                        </div>
+                        <div class="mb-4">
+                            <label for="logChannels" class="block text-gray-400 text-sm font-bold mb-2">Log Channel Changes?</label>
+                            <input type="checkbox" id="logChannels" class="form-checkbox h-5 w-5 text-accent rounded">
+                        </div>
+                        <button id="saveLoggingSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Logging Settings</button>
+                        <p id="loggingStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Ticket System Settings Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Ticket System</h3>
+                        <div class="mb-4">
+                            <label for="ticketCategory" class="block text-gray-400 text-sm font-bold mb-2">Ticket Category ID</label>
+                            <input type="text" id="ticketCategory" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <div class="mb-4">
+                            <label for="ticketRole" class="block text-gray-400 text-sm font-bold mb-2">Support Role ID</label>
+                            <input type="text" id="ticketRole" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <button id="saveTicketSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Ticket Settings</button>
+                        <p id="ticketStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Advanced Settings & Integrations Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Advanced Settings</h3>
+                        <div class="mb-4">
+                            <label for="commandCooldown" class="block text-gray-400 text-sm font-bold mb-2">Command Cooldown (seconds)</label>
+                            <input type="number" id="commandCooldown" class="input-field" min="0" value="3" placeholder="e.g., 3">
+                        </div>
+                        <div class="mb-4">
+                            <label for="enableAI" class="block text-gray-400 text-sm font-bold mb-2">Enable AI Responses?</label>
+                            <input type="checkbox" id="enableAI" class="form-checkbox h-5 w-5 text-accent rounded">
+                        </div>
+                        <button id="saveAdvancedSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Advanced Settings</button>
+                        <p id="advancedStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                    <!-- Announcement Builder Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Announcement Builder (Embed)</h3>
+                        <div class="mb-4">
+                            <label for="announcementChannelId" class="block text-gray-400 text-sm font-bold mb-2">Target Channel ID</label>
+                            <input type="text" id="announcementChannelId" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <div class="mb-4">
+                            <label for="embedTitle" class="block text-gray-400 text-sm font-bold mb-2">Embed Title</label>
+                            <input type="text" id="embedTitle" class="input-field" placeholder="e.g., Important Update!">
+                        </div>
+                        <div class="mb-4">
+                            <label for="embedDescription" class="block text-gray-400 text-sm font-bold mb-2">Embed Description</label>
+                            <textarea id="embedDescription" class="input-field h-24 resize-y" placeholder="Details about the announcement..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="embedColor" class="block text-gray-400 text-sm font-bold mb-2">Embed Color (Hex Code)</label>
+                            <input type="text" id="embedColor" class="input-field" value="#5F9EA0" placeholder="e.g., #5F9EA0">
+                        </div>
+                        <button id="sendAnnouncementBtn" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Send Announcement</button>
+                        <p id="announcementStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+
+                </div>
+            </div>
+            <div id="noGuildSelected" class="text-center text-gray-400 mt-12">
+                <p class="text-lg">Please select a server from the left sidebar to manage its settings.</p>
+                <p class="text-sm mt-2">Only servers where the ZeroPoint Bot is present will be listed.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="w-full bg-[#1A1A1A] p-4 text-center text-gray-500 text-sm mt-auto z-10">
+        &copy; <span id="current-year"></span> ZeroPoint. All rights reserved.
+    </footer>
+
+    <script>
+        const BASE_URL = window.location.origin;
+        let userGuilds = [];
+        let botGuilds = [];
+        let selectedGuildId = null;
+
+        // DOM Elements
+        const usernameSpan = document.getElementById('username');
+        const guildListElement = document.getElementById('guildList');
+        const guildsHeader = document.getElementById('guildsHeader');
+        const selectedGuildNameSpan = document.getElementById('selectedGuildName');
+        const settingsContentDiv = document.getElementById('settingsContent');
+        const noGuildSelectedDiv = document.getElementById('noGuildSelected');
+
+        // Settings input fields
+        const botPrefixInput = document.getElementById('botPrefix');
+        const defaultRoleInput = document.getElementById('defaultRole');
+        const logChannelInput = document.getElementById('logChannel');
+        const logMessagesCheckbox = document.getElementById('logMessages');
+        const logChannelsCheckbox = document.getElementById('logChannels');
+        const welcomeChannelInput = document.getElementById('welcomeChannel');
+        const welcomeMessageInput = document.getElementById('welcomeMessage');
+        const welcomeDMCheckbox = document.getElementById('welcomeDM');
+        const ticketCategoryInput = document.getElementById('ticketCategory');
+        const ticketRoleInput = document.getElementById('ticketRole');
+        const commandCooldownInput = document.getElementById('commandCooldown');
+        const enableAICheckbox = document.getElementById('enableAI');
+        const announcementChannelIdInput = document.getElementById('announcementChannelId');
+        const embedTitleInput = document.getElementById('embedTitle');
+        const embedDescriptionInput = document.getElementById('embedDescription');
+        const embedColorInput = document.getElementById('embedColor');
+
+
+        // Save buttons and status messages
+        const saveGeneralSettingsBtn = document.getElementById('saveGeneralSettings');
+        const generalStatusMsg = document.getElementById('generalStatus');
+        const saveWelcomeSettingsBtn = document.getElementById('saveWelcomeSettings');
+        const welcomeStatusMsg = document.getElementById('welcomeStatus');
+        const saveLoggingSettingsBtn = document.getElementById('saveLoggingSettings');
+        const loggingStatusMsg = document.getElementById('loggingStatus');
+        const saveTicketSettingsBtn = document.getElementById('saveTicketSettings');
+        const ticketStatusMsg = document.getElementById('ticketStatus');
+        const saveAdvancedSettingsBtn = document.getElementById('saveAdvancedSettings');
+        const advancedStatusMsg = document.getElementById('advancedStatus');
+        const sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
+        const announcementStatusMsg = document.getElementById('announcementStatus');
+
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            await fetchUserData();
+            await fetchBotGuilds();
+            renderGuildList();
+
+            // Add event listeners for save buttons
+            saveGeneralSettingsBtn.addEventListener('click', () => saveSettings('general'));
+            saveWelcomeSettingsBtn.addEventListener('click', () => saveSettings('welcome'));
+            saveLoggingSettingsBtn.addEventListener('click', () => saveSettings('logging'));
+            saveTicketSettingsBtn.addEventListener('click', () => saveSettings('ticket'));
+            saveAdvancedSettingsBtn.addEventListener('click', () => saveSettings('advanced'));
+            sendAnnouncementBtn.addEventListener('click', sendAnnouncement);
+        });
+
+        async function fetchUserData() {
+            try {
+                const response = await fetch(BASE_URL + '/user');
+                if (!response.ok) {
+                    throw new Error('Not authenticated or API error: ' + response.statusText);
+                }
+                const data = await response.json();
+                usernameSpan.textContent = data.username + '#' + data.discriminator;
+                userGuilds = data.guilds || [];
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                window.location.href = BASE_URL + '/'; // Redirect to login on error
+            }
+        }
+
+        async function fetchBotGuilds() {
+            try {
+                const response = await fetch(BASE_URL + '/bot-guilds');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch bot guilds: ' + response.statusText);
+                }
+                botGuilds = await response.json();
+            } catch (error) {
+                console.error('Error fetching bot guilds:', error);
+                guildListElement.innerHTML = '<li class="text-red-400">Could not load bot guilds. Please check server logs.</li>';
+                guildsHeader.classList.add('hidden'); // Hide header if bot guilds cannot be loaded
+            }
+        }
+
+        function renderGuildList() {
+            guildListElement.innerHTML = ''; // Clear existing list
+
+            const guildsWithBot = userGuilds.filter(userGuild =>
+                botGuilds.some(botGuild => botGuild.id === userGuild.id)
+            );
+
+            if (guildsWithBot.length === 0) {
+                guildsHeader.classList.add('hidden'); // Hide the header
+                guildListElement.innerHTML = '<li class="text-gray-400">ZeroPoint Bot is not in any of your servers.</li>';
+                return;
+            }
+
+            guildsHeader.classList.remove('hidden'); // Show the header if there are guilds with the bot
+
+            guildsWithBot.forEach(guild => {
+                const listItem = document.createElement('li');
+                listItem.className = 'guild-card flex items-center p-3 rounded-md bg-[#282828] hover:bg-[#3A3A3A] transition-colors duration-200'; /* Adjusted background for consistency */
+                listItem.dataset.guildId = guild.id;
+                listItem.innerHTML = `
+                    ${guild.icon ? `<img src="https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=32" alt="${guild.name} icon" class="w-8 h-8 rounded-full mr-3">` : `<div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold mr-3">${guild.name.charAt(0)}</div>`}
+                    <span class="text-white font-medium">${guild.name}</span>
+                `;
+                listItem.addEventListener('click', () => selectGuild(guild.id, guild.name));
+                guildListElement.appendChild(listItem);
+            });
+        }
+
+        async function selectGuild(guildId, guildName) {
+            if (selectedGuildId) {
+                const prevSelected = document.querySelector(`.guild-card[data-guild-id="${selectedGuildId}"]`);
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
+                }
+            }
+            selectedGuildId = guildId;
+            selectedGuildNameSpan.textContent = guildName;
+            noGuildSelectedDiv.classList.add('hidden');
+            settingsContentDiv.classList.remove('hidden');
+
+            const currentSelected = document.querySelector(`.guild-card[data-guild-id="${selectedGuildId}"]`);
+            if (currentSelected) {
+                currentSelected.classList.add('selected');
+            }
+
+            // Reset all status messages
+            document.querySelectorAll('.status-message').forEach(msg => {
+                msg.textContent = '';
+                msg.classList.remove('show', 'status-success', 'status-error');
+            });
+
+            // Load settings for the newly selected guild
+            await loadSettings(guildId);
+        }
+
+        async function loadSettings(guildId) {
+            // In a real application, you would fetch settings from your backend API:
+            // const response = await fetch(`${BASE_URL}/api/settings/${guildId}`);
+            // const settings = await response.json();
+            // For now, we'll simulate loading with dummy data or defaults
+
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Dummy settings data (replace with actual fetch from backend)
+            // These values would come from your database for the selected guild
+            const dummySettings = {
+                general: {
+                    botPrefix: '!',
+                    defaultRole: '' // Empty by default
+                },
+                welcome: {
+                    welcomeChannel: '',
+                    welcomeMessage: `Welcome {user} to ${selectedGuildNameSpan.textContent}! Enjoy your stay.`,
+                    sendWelcomeDM: false
+                },
+                logging: {
+                    logChannel: '',
+                    logMessages: true,
+                    logChannels: true
+                },
+                ticket: {
+                    ticketCategory: '',
+                    ticketRole: ''
+                },
+                advanced: {
+                    commandCooldown: 5,
+                    enableAI: false
+                }
+            };
+
+            // Populate input fields with loaded settings
+            botPrefixInput.value = dummySettings.general.botPrefix;
+            defaultRoleInput.value = dummySettings.general.defaultRole;
+            logChannelInput.value = dummySettings.logging.logChannel;
+            logMessagesCheckbox.checked = dummySettings.logging.logMessages;
+            logChannelsCheckbox.checked = dummySettings.logging.logChannels;
+            welcomeChannelInput.value = dummySettings.welcome.welcomeChannel;
+            welcomeMessageInput.value = dummySettings.welcome.welcomeMessage;
+            welcomeDMCheckbox.checked = dummySettings.welcome.sendWelcomeDM;
+            ticketCategoryInput.value = dummySettings.ticket.ticketCategory;
+            ticketRoleInput.value = dummySettings.ticket.ticketRole;
+            commandCooldownInput.value = dummySettings.advanced.commandCooldown;
+            enableAICheckbox.checked = dummySettings.advanced.enableAI;
+
+            // Reset announcement builder fields on guild change
+            announcementChannelIdInput.value = '';
+            embedTitleInput.value = '';
+            embedDescriptionInput.value = '';
+            embedColorInput.value = '#5F9EA0'; // Default color
+        }
+
+        async function saveSettings(settingType) {
+            if (!selectedGuildId) {
+                // Using a simple alert for now, consider a custom modal in production
+                alert('Please select a guild first!');
+                return;
+            }
+
+            let dataToSave = {};
+            let statusMessageElement;
+            let saveButtonElement;
+
+            if (settingType === 'general') {
+                dataToSave = {
+                    botPrefix: botPrefixInput.value,
+                    defaultRole: defaultRoleInput.value
+                };
+                statusMessageElement = generalStatusMsg;
+                saveButtonElement = saveGeneralSettingsBtn;
+            } else if (settingType === 'welcome') {
+                dataToSave = {
+                    welcomeChannel: welcomeChannelInput.value,
+                    welcomeMessage: welcomeMessageInput.value,
+                    sendWelcomeDM: welcomeDMCheckbox.checked
+                };
+                statusMessageElement = welcomeStatusMsg;
+                saveButtonElement = saveWelcomeSettingsBtn;
+            } else if (settingType === 'logging') {
+                dataToSave = {
+                    logChannel: logChannelInput.value,
+                    logMessages: logMessagesCheckbox.checked,
+                    logChannels: logChannelsCheckbox.checked
+                };
+                statusMessageElement = loggingStatusMsg;
+                saveButtonElement = saveLoggingSettingsBtn;
+            } else if (settingType === 'ticket') {
+                dataToSave = {
+                    ticketCategory: ticketCategoryInput.value,
+                    ticketRole: ticketRoleInput.value
+                };
+                statusMessageElement = ticketStatusMsg;
+                saveButtonElement = saveTicketSettingsBtn;
+            } else if (settingType === 'advanced') {
+                dataToSave = {
+                    commandCooldown: parseInt(commandCooldownInput.value, 10),
+                    enableAI: enableAICheckbox.checked
+                };
+                statusMessageElement = advancedStatusMsg;
+                saveButtonElement = saveAdvancedSettingsBtn;
+            } else {
+                console.error('Unknown setting type:', settingType);
+                return;
+            }
+
+            // Disable button and show saving status
+            saveButtonElement.disabled = true;
+            statusMessageElement.textContent = 'Saving...';
+            statusMessageElement.classList.remove('status-success', 'status-error');
+            statusMessageElement.classList.add('show');
+
+            try {
+                // In a real application, you would send this data to your backend API:
+                // const response = await fetch(`${BASE_URL}/api/settings/${selectedGuildId}/${settingType}`, {
+                //     method: 'POST', // Or PATCH
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(dataToSave)
+                // });
+                // if (!response.ok) {
+                //     throw new Error('Server responded with an error.');
+                // }
+                // const result = await response.json(); // If your API returns a confirmation
+
+                console.log(`Simulating saving ${settingType} settings for guild ${selectedGuildId}:`, dataToSave);
+
+                // Simulate API call delay and success/failure
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+                const success = Math.random() > 0.1; // 90% chance of success for demo
+
+                if (success) {
+                    statusMessageElement.textContent = 'Settings saved successfully!';
+                    statusMessageElement.classList.add('status-success');
+                } else {
+                    throw new Error('Failed to save settings on the server.');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                statusMessageElement.textContent = `Error: ${error.message}`;
+                statusMessageElement.classList.add('status-error');
+            } finally {
+                saveButtonElement.disabled = false;
+                // Hide status message after a few seconds
+                setTimeout(() => {
+                    statusMessageElement.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        async function sendAnnouncement() {
+            if (!selectedGuildId) {
+                alert('Please select a guild first!');
+                return;
+            }
+
+            const channelId = announcementChannelIdInput.value.trim();
+            const embedTitle = embedTitleInput.value.trim();
+            const embedDescription = embedDescriptionInput.value.trim();
+            const embedColor = embedColorInput.value.trim();
+
+            if (!channelId || !embedTitle || !embedDescription) {
+                announcementStatusMsg.textContent = 'Please fill in all announcement fields (Channel ID, Title, Description).';
+                announcementStatusMsg.classList.add('show', 'status-error');
+                setTimeout(() => announcementStatusMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            // Convert hex color to decimal for Discord embed
+            const colorDecimal = parseInt(embedColor.replace('#', ''), 16);
+
+            const embedData = {
+                title: embedTitle,
+                description: embedDescription,
+                color: colorDecimal,
+                timestamp: new Date().toISOString(), // Current time
+                footer: {
+                    text: 'ZeroPoint Bot Announcement'
+                }
+            };
+
+            // Disable button and show sending status
+            sendAnnouncementBtn.disabled = true;
+            announcementStatusMsg.textContent = 'Sending announcement...';
+            announcementStatusMsg.classList.remove('status-success', 'status-error');
+            announcementStatusMsg.classList.add('show');
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/send-announcement/${selectedGuildId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId, embedData })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to send announcement.');
+                }
+
+                announcementStatusMsg.textContent = 'Announcement sent successfully!';
+                announcementStatusMsg.classList.add('status-success');
+
+                // Clear fields after successful send
+                announcementChannelIdInput.value = '';
+                embedTitleInput.value = '';
+                embedDescriptionInput.value = '';
+                embedColorInput.value = '#5F9EA0';
+
+            } catch (error) {
+                console.error('Error sending announcement:', error);
+                announcementStatusMsg.textContent = `Error: ${error.message}`;
+                announcementStatusMsg.classList.add('status-error');
+            } finally {
+                sendAnnouncementBtn.disabled = false;
+                setTimeout(() => {
+                    announcementStatusMsg.classList.remove('show');
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>

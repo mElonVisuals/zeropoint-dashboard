@@ -1,0 +1,251 @@
+// server.js
+// Backend server for the ZeroPoint Bot Dashboard
+
+require('dotenv').config(); // Load environment variables from .env file
+const express = require('express');
+const session = require('express-session');
+const passport = require('passport');
+const DiscordStrategy = require('passport-discord').Strategy;
+const path = require('path');
+const axios = require('axios'); // Import axios for making HTTP requests
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// --- Discord OAuth2 Configuration ---
+const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // NEW: Bot token for fetching bot's guilds
+
+if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.error("Error: DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET environment variables must be set.");
+    process.exit(1);
+}
+if (SESSION_SECRET === 'a_fallback_secret_if_not_set_in_env') {
+    console.warn("WARNING: SESSION_SECRET is using a fallback value. Please set SESSION_SECRET in your .env file and Coolify environment variables for production.");
+}
+if (!DISCORD_BOT_TOKEN) {
+    console.warn("WARNING: DISCORD_BOT_TOKEN is not set. Bot guild fetching and announcement features will not work.");
+}
+
+
+// Passport session setup.
+//   To support persistent login sessions, Passport needs to be able to
+//   serialize users into and deserialize users out of the session.
+//   Typically, this will be as simple as storing the user ID when serializing
+//   and finding the user by ID when deserializing.
+passport.serializeUser((user, done) => {
+    console.log("[DEBUG] serializeUser: User ID", user.id); // Log when user is serialized
+    done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj); // Log the object itself
+    if (obj && obj.id) {
+        console.log("[DEBUG] deserializeUser: User ID", obj.id); // Log when user is deserialized
+        done(null, obj);
+    } else {
+        console.error("[ERROR] deserializeUser: Invalid user object received.");
+        done(new Error("Invalid user object"), null);
+    }
+});
+
+// Use the DiscordStrategy within Passport.
+passport.use(new DiscordStrategy({
+    clientID: CLIENT_ID,
+    clientSecret: CLIENT_SECRET,
+    callbackURL: REDIRECT_URI,
+    scope: ['identify', 'guilds'] // Request user ID, username, and guilds they are in
+},
+(accessToken, refreshToken, profile, done) => {
+    // In this example, we're just passing the profile directly.
+    // In a real application, you'd save/find the user in your database here.
+    console.log("[DEBUG] DiscordStrategy Callback: User Profile ID", profile.id);
+    return done(null, profile);
+}));
+
+// --- Express Middleware ---
+app.use(session({
+    secret: SESSION_SECRET, // Use the secret from environment variables
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60000 * 60 * 24, // Session lasts 24 hours
+        // Set 'secure' to true if the REDIRECT_URI starts with HTTPS,
+        // which indicates a production or secure environment.
+        secure: REDIRECT_URI.startsWith('https://'),
+        httpOnly: true, // Prevents client-side JavaScript from accessing cookies
+        sameSite: 'Lax' // Recommended for security and modern browser behavior
+    }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Enable JSON body parsing for incoming requests
+app.use(express.json());
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Middleware to check if user is authenticated
+function ensureAuthenticated(req, res, next) {
+    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}, isAuthenticated: ${req.isAuthenticated()}`);
+    if (req.isAuthenticated()) {
+        console.log("[DEBUG] ensureAuthenticated: User is authenticated. User ID:", req.user ? req.user.id : 'N/A');
+        return next();
+    }
+    console.log("[DEBUG] ensureAuthenticated: User not authenticated for path:", req.path, "Redirecting to /");
+    res.redirect('/');
+}
+
+// --- Routes ---
+
+// Route to initiate Discord OAuth2 login
+app.get('/login', (req, res, next) => {
+    console.log("[DEBUG] /login: Initiating Discord OAuth.");
+    passport.authenticate('discord')(req, res, next);
+});
+
+// OAuth2 callback route
+app.get('/auth/discord/callback',
+    passport.authenticate('discord', { failureRedirect: '/' }),
+    (req, res) => {
+        console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
+        if (req.isAuthenticated()) {
+            console.log("[DEBUG] OAuth2 Callback: User authenticated, redirecting to /dashboard.");
+            res.redirect('/dashboard');
+        } else {
+            console.error("[ERROR] OAuth2 Callback: User not authenticated after successful Passport auth. This should not happen.");
+            res.redirect('/'); // Should not happen if Passport auth was successful
+        }
+    }
+);
+
+// Dashboard route - requires authentication
+app.get('/dashboard', ensureAuthenticated, (req, res) => { // Added ensureAuthenticated middleware
+    console.log("[DEBUG] Accessing /dashboard. isAuthenticated:", req.isAuthenticated());
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// User data endpoint (protected)
+app.get('/user', ensureAuthenticated, (req, res) => { // Added ensureAuthenticated middleware
+    console.log("[DEBUG] Accessing /user. isAuthenticated:", req.isAuthenticated());
+    console.log("[DEBUG] /user: Sending user data for ID:", req.user ? req.user.id : 'N/A');
+    res.json(req.user); // req.user contains the Discord profile
+});
+
+// NEW: Endpoint to get guilds the bot is in (protected)
+app.get('/bot-guilds', ensureAuthenticated, async (req, res) => {
+    console.log("[DEBUG] Accessing /bot-guilds. isAuthenticated:", req.isAuthenticated());
+    if (!DISCORD_BOT_TOKEN) {
+        console.error("[ERROR] /bot-guilds: DISCORD_BOT_TOKEN is not set in environment variables.");
+        return res.status(500).json({ message: "Bot token not configured on the server." });
+    }
+
+    try {
+        // Fetch guilds the bot is in using Discord API
+        const response = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
+            headers: {
+                Authorization: `Bot ${DISCORD_BOT_TOKEN}`
+            }
+        });
+        const botGuilds = response.data;
+        console.log(`[DEBUG] /bot-guilds: Successfully fetched ${botGuilds.length} guilds for the bot.`);
+        res.json(botGuilds);
+    } catch (error) {
+        console.error("[ERROR] Failed to fetch bot guilds from Discord API:", error.message);
+        if (error.response) {
+            console.error("Discord API response error data:", error.response.data);
+            console.error("Discord API response status:", error.response.status);
+        }
+        res.status(500).json({ message: "Failed to fetch bot guilds." });
+    }
+});
+
+// NEW: Endpoint to handle saving advanced settings (placeholder for now)
+app.post('/api/settings/advanced/:guildId', ensureAuthenticated, (req, res) => {
+    const { guildId } = req.params;
+    const settings = req.body;
+    console.log(`[DEBUG] Received advanced settings for guild ${guildId}:`, settings);
+    // In a real application, you would save these settings to a database
+    res.status(200).json({ message: `Advanced settings for guild ${guildId} saved successfully (simulated).` });
+});
+
+// NEW: Endpoint to send an embedded message as the bot for announcements
+app.post('/api/send-announcement/:guildId', ensureAuthenticated, async (req, res) => {
+    const { guildId } = req.params;
+    const { channelId, embedData } = req.body;
+
+    console.log(`[DEBUG] Attempting to send announcement for guild ${guildId} to channel ${channelId}.`);
+
+    if (!DISCORD_BOT_TOKEN) {
+        console.error("[ERROR] /api/send-announcement: DISCORD_BOT_TOKEN is not set.");
+        return res.status(500).json({ message: "Bot token not configured on the server." });
+    }
+    if (!channelId || !embedData) {
+        console.error("[ERROR] /api/send-announcement: Missing channelId or embedData in request body.");
+        return res.status(400).json({ message: "Missing channelId or embedData." });
+    }
+
+    try {
+        const discordApiUrl = `https://discord.com/api/v10/channels/${channelId}/messages`;
+        const payload = {
+            embeds: [embedData],
+            // Optionally, you can include content for a regular message alongside the embed
+            // content: "New Announcement!"
+        };
+
+        const response = await axios.post(discordApiUrl, payload, {
+            headers: {
+                'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log(`[DEBUG] Announcement sent successfully to channel ${channelId}. Discord API response status: ${response.status}`);
+        res.status(200).json({ message: "Announcement sent successfully!", discordResponse: response.data });
+    } catch (error) {
+        console.error("[ERROR] Failed to send announcement via Discord API:", error.message);
+        if (error.response) {
+            console.error("Discord API response error data:", error.response.data);
+            console.error("Discord API response status:", error.response.status);
+        }
+        res.status(500).json({ message: "Failed to send announcement.", error: error.message, discordApiError: error.response ? error.response.data : null });
+    }
+});
+
+
+// Logout route
+app.get('/logout', (req, res) => {
+    console.log("[DEBUG] /logout: Attempting logout for user:", req.user ? req.user.id : 'N/A');
+    req.logout((err) => { // req.logout requires a callback in newer Passport versions
+        if (err) {
+            console.error("Error during logout:", err);
+            return res.status(500).send("Error during logout.");
+        }
+        req.session.destroy((err) => {
+            if (err) {
+                console.error("Error destroying session:", err);
+                return res.status(500).send("Error destroying session.");
+            }
+            console.log("[DEBUG] Session destroyed. Redirecting to /.");
+            res.redirect('/');
+        });
+    });
+});
+
+// Default route (serves the login page)
+app.get('/', (req, res) => {
+    console.log("[DEBUG] Accessing / (login page). isAuthenticated:", req.isAuthenticated());
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
+    console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
+    // Log the actual secure setting based on the REDIRECT_URI
+    console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
+});
