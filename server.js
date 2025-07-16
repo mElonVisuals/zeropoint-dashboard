@@ -88,7 +88,16 @@ passport.use(new DiscordStrategy({
 // --- Express Middleware ---
 
 // Initialize Redis client
-const redisClient = redis.createClient({ url: REDIS_URL });
+// Added `tls: { rejectUnauthorized: false }` to handle self-signed certificates.
+// Use this if your Redis server uses TLS but with a self-signed certificate.
+// If your Redis server does NOT use TLS, ensure your REDIS_URL starts with `redis://` not `rediss://`.
+const redisClient = redis.createClient({
+    url: REDIS_URL,
+    tls: {
+        rejectUnauthorized: false // WARNING: Use this only if you trust the Redis server and its network.
+                                  // In production with a public Redis, you'd typically use a CA certificate.
+    }
+});
 
 redisClient.on('connect', () => console.log('✅ Redis client connected successfully!'));
 redisClient.on('error', (err) => console.error('❌ Redis Client Error', err));
