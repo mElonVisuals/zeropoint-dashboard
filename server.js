@@ -22,8 +22,8 @@ const PORT = 3000;
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://dashboard.melonvisuals.me/auth/discord/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'c4j9K!pZ@x7sQ_rVf8tYuB$eN%wX&aC*dF+gH-jK=lLmN~oP:qRsT<uV>wX?yZ[0123456789]{|}~'; // IMPORTANT: Use a strong secret from .env
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // NEW: Bot token for fetching bot's guilds
 const REDIS_URL = process.env.REDIS_URL; // NEW: Redis connection URL
 
@@ -45,6 +45,8 @@ if (!REDIS_URL) {
 
 // Log NODE_ENV to help with debugging production vs. development behavior
 console.log(`[DEBUG] NODE_ENV is: ${process.env.NODE_ENV}`);
+// Log a masked version of the session secret to confirm it's being picked up
+console.log(`[DEBUG] SESSION_SECRET (masked): ${SESSION_SECRET.substring(0, 5)}...${SESSION_SECRET.substring(SESSION_SECRET.length - 5)}`);
 
 
 // Passport session setup.
@@ -53,13 +55,13 @@ console.log(`[DEBUG] NODE_ENV is: ${process.env.NODE_ENV}`);
 //   Typically, this will be as simple as storing the user ID when serializing
 //   and finding the user by ID when deserializing.
 passport.serializeUser((user, done) => {
-    console.log("[DEBUG] serializeUser: User ID", user.id); // Log when user is serialized
+    console.log("[DEBUG] serializeUser: User ID", user.id, "Session ID:", user.sessionID); // Log when user is serialized
     done(null, user);
 });
 
 passport.deserializeUser((obj, done) => {
     // This log is critical to see what Passport is trying to deserialize
-    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj);
+    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj, "Current Session ID:", obj ? obj.sessionID : 'N/A');
     if (obj && obj.id) {
         console.log("[DEBUG] deserializeUser: User ID", obj.id); // Log when user is deserialized
         done(null, obj);
@@ -82,6 +84,8 @@ passport.use(new DiscordStrategy({
     // In this example, we're just passing the profile directly.
     // In a real application, you'd save/find the user in your database here.
     console.log("[DEBUG] DiscordStrategy Callback: User Profile ID", profile.id);
+    // Attach session ID to profile for debugging deserializeUser
+    profile.sessionID = this.sessionID; // This will be undefined here, but we'll try to get it from req.session later
     return done(null, profile);
 }));
 
@@ -168,6 +172,9 @@ app.get('/auth/discord/callback',
     passport.authenticate('discord', { failureRedirect: '/' }),
     (req, res) => {
         console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
+        // After successful authentication, the user object is attached to req.session.passport.user
+        // We can now log the session ID here to compare with deserializeUser
+        console.log("[DEBUG] OAuth2 Callback: Session ID after auth:", req.sessionID);
         if (req.isAuthenticated()) {
             console.log("[DEBUG] OAuth2 Callback: User authenticated, redirecting to /dashboard.");
             res.redirect('/dashboard');
