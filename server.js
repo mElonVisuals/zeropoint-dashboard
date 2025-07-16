@@ -49,7 +49,7 @@ passport.deserializeUser((obj, done) => {
         console.log("[DEBUG] deserializeUser: User ID", obj.id); // Log when user is deserialized
         done(null, obj);
     } else {
-        console.error("[ERROR] deserializeUser: Invalid user object received.");
+        console.error("[ERROR] deserializeUser: Invalid user object received. Session might be corrupted or missing user data.");
         done(new Error("Invalid user object"), null);
     }
 });
@@ -82,6 +82,9 @@ app.use(session({
         sameSite: 'Lax' // Recommended for security and modern browser behavior
     }
 }));
+// Add this line right after the session middleware setup
+console.log(`[DEBUG] Session cookie 'secure' setting applied: ${REDIRECT_URI.startsWith('https://')}`);
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -93,7 +96,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to check if user is authenticated
 function ensureAuthenticated(req, res, next) {
-    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}, isAuthenticated: ${req.isAuthenticated()}`);
+    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`);
+    console.log(`[DEBUG] ensureAuthenticated: req.isAuthenticated() = ${req.isAuthenticated()}`);
+    console.log(`[DEBUG] ensureAuthenticated: req.session =`, req.session); // Log the entire session object
+    console.log(`[DEBUG] ensureAuthenticated: req.user =`, req.user); // Log the entire user object
+
     if (req.isAuthenticated()) {
         console.log("[DEBUG] ensureAuthenticated: User is authenticated. User ID:", req.user ? req.user.id : 'N/A');
         return next();
