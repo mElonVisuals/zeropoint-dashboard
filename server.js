@@ -9,6 +9,11 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
 const axios = require('axios'); // Import axios for making HTTP requests
 
+// --- Redis Session Store Setup ---
+// Import Redis and connect-redis
+const redis = require('redis');
+const RedisStore = require('connect-redis').default; // Use .default for commonJS import
+
 const app = express();
 // Explicitly set PORT to 3000 for consistency with Dockerfile EXPOSE
 // and to avoid issues if process.env.PORT is not set by the environment.
@@ -17,9 +22,10 @@ const PORT = 3000;
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // NEW: Bot token for fetching bot's guilds
+const REDIS_URL = process.env.REDIS_URL; // NEW: Redis connection URL
 
 if (!CLIENT_ID || !CLIENT_SECRET) {
     console.error("Error: DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET environment variables must be set.");
@@ -31,6 +37,14 @@ if (SESSION_SECRET === 'a_fallback_secret_if_not_set_in_env') {
 if (!DISCORD_BOT_TOKEN) {
     console.warn("WARNING: DISCORD_BOT_TOKEN is not set. Bot guild fetching and announcement features will not work.");
 }
+if (!REDIS_URL) {
+    console.error("CRITICAL ERROR: REDIS_URL environment variable is not set. Session persistence will fail without it.");
+    // In a real production app, you might want to exit here if Redis is mandatory
+    // process.exit(1);
+}
+
+// Log NODE_ENV to help with debugging production vs. development behavior
+console.log(`[DEBUG] NODE_ENV is: ${process.env.NODE_ENV}`);
 
 
 // Passport session setup.
@@ -44,13 +58,16 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((obj, done) => {
-    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj); // Log the object itself
+    // This log is critical to see what Passport is trying to deserialize
+    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj);
     if (obj && obj.id) {
         console.log("[DEBUG] deserializeUser: User ID", obj.id); // Log when user is deserialized
         done(null, obj);
     } else {
         console.error("[ERROR] deserializeUser: Invalid user object received. Session might be corrupted or missing user data.");
-        done(new Error("Invalid user object"), null);
+        // If obj is undefined/null, it means the session data stored by serializeUser was lost.
+        // This is the common symptom of using MemoryStore in production.
+        done(new Error("Invalid user object or session data lost"), null);
     }
 });
 
@@ -69,21 +86,33 @@ passport.use(new DiscordStrategy({
 }));
 
 // --- Express Middleware ---
+
+// Initialize Redis client
+const redisClient = redis.createClient({ url: REDIS_URL });
+
+redisClient.on('connect', () => console.log('✅ Redis client connected successfully!'));
+redisClient.on('error', (err) => console.error('❌ Redis Client Error', err));
+
+// Connect to Redis
+redisClient.connect().catch(console.error); // Ensure connect() is called
+
 app.use(session({
+    store: new RedisStore({ client: redisClient }), // Use RedisStore
     secret: SESSION_SECRET, // Use the secret from environment variables
-    resave: false,
-    saveUninitialized: false,
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session until something stored
     cookie: {
         maxAge: 60000 * 60 * 24, // Session lasts 24 hours
         // Set 'secure' to true if the REDIRECT_URI starts with HTTPS,
-        // which indicates a production or secure environment.
-        secure: REDIRECT_URI.startsWith('https://'),
+        // or if NODE_ENV is 'production' (Coolify often sets this).
+        secure: process.env.NODE_ENV === 'production' || REDIRECT_URI.startsWith('https://'),
         httpOnly: true, // Prevents client-side JavaScript from accessing cookies
         sameSite: 'Lax' // Recommended for security and modern browser behavior
     }
 }));
 // Add this line right after the session middleware setup
-console.log(`[DEBUG] Session cookie 'secure' setting applied: ${REDIRECT_URI.startsWith('https://')}`);
+console.log(`[DEBUG] Session cookie 'secure' setting applied: ${app.get('env') === 'production' || REDIRECT_URI.startsWith('https://')}`);
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -97,6 +126,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Middleware to check if user is authenticated
 function ensureAuthenticated(req, res, next) {
     console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`);
+    // This log will show if the passport object is even present in the session
+    console.log(`[DEBUG] ensureAuthenticated: req.session.passport =`, req.session.passport);
     console.log(`[DEBUG] ensureAuthenticated: req.isAuthenticated() = ${req.isAuthenticated()}`);
     console.log(`[DEBUG] ensureAuthenticated: req.session =`, req.session); // Log the entire session object
     console.log(`[DEBUG] ensureAuthenticated: req.user =`, req.user); // Log the entire user object
