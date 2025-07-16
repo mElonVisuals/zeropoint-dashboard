@@ -55,13 +55,14 @@ console.log(`[DEBUG] SESSION_SECRET (masked): ${SESSION_SECRET.substring(0, 5)}.
 //   Typically, this will be as simple as storing the user ID when serializing
 //   and finding the user by ID when deserializing.
 passport.serializeUser((user, done) => {
-    console.log("[DEBUG] serializeUser: User ID", user.id, "Session ID:", user.sessionID); // Log when user is serialized
+    // Note: req.sessionID is not directly available here, but the session is managed by express-session
+    console.log("[DEBUG] serializeUser: User ID", user.id);
     done(null, user);
 });
 
 passport.deserializeUser((obj, done) => {
     // This log is critical to see what Passport is trying to deserialize
-    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj, "Current Session ID:", obj ? obj.sessionID : 'N/A');
+    console.log("[DEBUG] deserializeUser: Object received for deserialization:", obj);
     if (obj && obj.id) {
         console.log("[DEBUG] deserializeUser: User ID", obj.id); // Log when user is deserialized
         done(null, obj);
@@ -84,8 +85,7 @@ passport.use(new DiscordStrategy({
     // In this example, we're just passing the profile directly.
     // In a real application, you'd save/find the user in your database here.
     console.log("[DEBUG] DiscordStrategy Callback: User Profile ID", profile.id);
-    // Attach session ID to profile for debugging deserializeUser
-    profile.sessionID = this.sessionID; // This will be undefined here, but we'll try to get it from req.session later
+    // Removed: profile.sessionID = this.sessionID; // This was problematic
     return done(null, profile);
 }));
 
@@ -144,7 +144,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to check if user is authenticated
 function ensureAuthenticated(req, res, next) {
-    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`);
+    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`); // Log session ID here
     // This log will show if the passport object is even present in the session
     console.log(`[DEBUG] ensureAuthenticated: req.session.passport =`, req.session.passport);
     console.log(`[DEBUG] ensureAuthenticated: req.isAuthenticated() = ${req.isAuthenticated()}`);
