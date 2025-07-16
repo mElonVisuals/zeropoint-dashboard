@@ -1,7 +1,7 @@
 {
   "name": "zeropoint-webdashboard",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.0.1",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,6 +15,8 @@
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "passport": "^0.7.0",
-    "passport-discord": "^0.1.4"
+    "passport-discord": "^0.1.4",
+    "connect-redis": "^7.1.1",
+    "redis": "^4.6.15"
   }
 }
