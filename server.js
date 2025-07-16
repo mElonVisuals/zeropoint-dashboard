@@ -22,8 +22,8 @@ const PORT = 3000;
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // NEW: Bot token for fetching bot's guilds
 const REDIS_URL = process.env.REDIS_URL; // NEW: Redis connection URL
 
@@ -87,17 +87,23 @@ passport.use(new DiscordStrategy({
 
 // --- Express Middleware ---
 
-// Initialize Redis client
-// Added `tls: { rejectUnauthorized: false }` to handle self-signed certificates.
-// Use this if your Redis server uses TLS but with a self-signed certificate.
-// If your Redis server does NOT use TLS, ensure your REDIS_URL starts with `redis://` not `rediss://`.
-const redisClient = redis.createClient({
+// Initialize Redis client options
+const redisClientOptions = {
     url: REDIS_URL,
-    tls: {
+};
+
+// Conditionally add TLS options if the REDIS_URL indicates a secure connection
+if (REDIS_URL && REDIS_URL.startsWith('rediss://')) {
+    redisClientOptions.tls = {
         rejectUnauthorized: false // WARNING: Use this only if you trust the Redis server and its network.
                                   // In production with a public Redis, you'd typically use a CA certificate.
-    }
-});
+    };
+    console.log("[DEBUG] Redis client configured for TLS with rejectUnauthorized: false.");
+} else {
+    console.log("[DEBUG] Redis client configured for non-TLS connection (or REDIS_URL not set/invalid).");
+}
+
+const redisClient = redis.createClient(redisClientOptions);
 
 redisClient.on('connect', () => console.log('✅ Redis client connected successfully!'));
 redisClient.on('error', (err) => console.error('❌ Redis Client Error', err));
