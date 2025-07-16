@@ -10,7 +10,9 @@ const path = require('path');
 const axios = require('axios'); // Import axios for making HTTP requests
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Explicitly set PORT to 3000 for consistency with Dockerfile EXPOSE
+// and to avoid issues if process.env.PORT is not set by the environment.
+const PORT = 3000;
 
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -243,9 +245,16 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
-    console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
-    // Log the actual secure setting based on the REDIRECT_URI
-    console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
-});
+// Added a try-catch block around app.listen for better error reporting during startup
+try {
+    app.listen(PORT, () => {
+        console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
+        console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
+        // Log the actual secure setting based on the REDIRECT_URI
+        console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
+    });
+} catch (startupError) {
+    console.error("[CRITICAL ERROR] Failed to start Express server:", startupError.message);
+    // You might want to exit the process here if the server cannot start
+    process.exit(1);
+}
