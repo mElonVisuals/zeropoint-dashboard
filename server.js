@@ -10,7 +10,7 @@ const path = require('path');
 const axios = require('axios'); // Import axios for making HTTP requests
 
 const app = express();
-const PORT = process.env.PORT || false;
+const PORT = process.env.PORT || 3000;
 
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
