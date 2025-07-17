@@ -83,13 +83,27 @@ app.set('trust proxy', 1);
 console.log("[DEBUG] Express 'trust proxy' set to 1.");
 
 // Initialize PostgreSQL client pool
-const pgPool = new pg.Pool({
+const pgPoolConfig = {
     connectionString: DATABASE_URL,
-    // Add SSL options if your PostgreSQL requires it (e.g., on Heroku, Render, some Coolify setups)
-    // ssl: {
-    //     rejectUnauthorized: false // Use this if you have a self-signed cert or no cert validation needed
-    // }
-});
+};
+
+// Conditionally add SSL options if running in production AND DATABASE_URL starts with 'postgres://' (common for cloud DBs)
+// If your Coolify PostgreSQL is internal and doesn't use SSL, leave this commented or set to false
+// If it uses SSL with a self-signed cert, you might need rejectUnauthorized: false
+if (process.env.NODE_ENV === 'production' && DATABASE_URL && DATABASE_URL.startsWith('postgres')) {
+    // Check if the URL explicitly requests SSL (e.g., ?sslmode=require) or if it's a known cloud provider
+    // For Coolify internal PostgreSQL, you typically do NOT need SSL unless explicitly configured.
+    // If you get 'self-signed certificate' errors, uncomment and set rejectUnauthorized to false.
+    // pgPoolConfig.ssl = {
+    //     rejectUnauthorized: false
+    // };
+    console.log("[DEBUG] PostgreSQL client configured for potential SSL (check if needed for your Coolify DB).");
+} else {
+    console.log("[DEBUG] PostgreSQL client configured for non-SSL connection.");
+}
+
+
+const pgPool = new pg.Pool(pgPoolConfig);
 
 // Optional: Log successful connection or errors
 pgPool.on('connect', () => console.log('✅ PostgreSQL client connected successfully!'));
@@ -265,7 +279,7 @@ app.get('/', (req, res) => {
 // Start the server
 try {
     app.listen(PORT, () => {
-        console.log(`ZeroPoint Dashboard backend running on http://dashboard.melonvisuals.me:${PORT}`);
+        console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
         console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
         console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
     });
