@@ -87,12 +87,7 @@ const pgPoolConfig = {
     connectionString: DATABASE_URL,
 };
 
-// Removed the SSL configuration block.
-// The error "The server does not support SSL connections" indicates
-// that the PostgreSQL server is not configured for SSL, so we should not request it.
 console.log("[DEBUG] PostgreSQL client configured for non-SSL connection (SSL options removed).");
-
-// Log the final pgPoolConfig before creating the pool
 console.log("[DEBUG] Final pgPoolConfig:", pgPoolConfig);
 
 
@@ -102,181 +97,222 @@ const pgPool = new pg.Pool(pgPoolConfig);
 pgPool.on('connect', () => console.log('✅ PostgreSQL client connected successfully!'));
 pgPool.on('error', (err) => console.error('❌ PostgreSQL Pool Error', err.message, err.stack));
 
-app.use(session({
-    store: new pgSession({
-        pool : pgPool,                // Connection pool
-        tableName : 'user_sessions'   // Use a custom table name for sessions
-    }),
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 60000 * 60 * 24, // Session lasts 24 hours
-        secure: process.env.NODE_ENV === 'production' || REDIRECT_URI.startsWith('https://'),
-        httpOnly: true,
-        sameSite: 'Lax'
-    }
-}));
-console.log(`[DEBUG] Session cookie 'secure' setting applied: ${app.get('env') === 'production' || REDIRECT_URI.startsWith('https://')}`);
+/**
+ * Initializes the database by checking if the 'user_sessions' table exists.
+ * If not, it creates the table with the required schema.
+ */
+async function initDatabase() {
+    try {
+        console.log("[INFO] Checking for 'user_sessions' table existence...");
+        const res = await pgPool.query(`
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = 'user_sessions'
+            );
+        `);
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Middleware to check if user is authenticated
-function ensureAuthenticated(req, res, next) {
-    console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`);
-    console.log(`[DEBUG] ensureAuthenticated: req.session.passport =`, req.session.passport);
-    console.log(`[DEBUG] ensureAuthenticated: req.isAuthenticated() = ${req.isAuthenticated()}`);
-    console.log(`[DEBUG] ensureAuthenticated: req.session =`, req.session);
-    console.log(`[DEBUG] ensureAuthenticated: req.user =`, req.user);
-
-    if (req.isAuthenticated()) {
-        console.log("[DEBUG] ensureAuthenticated: User is authenticated. User ID:", req.user ? req.user.id : 'N/A');
-        return next();
-    }
-    console.log("[DEBUG] ensureAuthenticated: User not authenticated for path:", req.path, "Redirecting to /");
-    res.redirect('/');
-}
-
-// --- Routes ---
-app.get('/login', (req, res, next) => {
-    console.log("[DEBUG] /login: Initiating Discord OAuth.");
-    passport.authenticate('discord')(req, res, next);
-});
-
-app.get('/auth/discord/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }),
-    (req, res) => {
-        console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
-        console.log("[DEBUG] OAuth2 Callback: Session ID after auth:", req.sessionID);
-        if (req.isAuthenticated()) {
-            console.log("[DEBUG] OAuth2 Callback: User authenticated, redirecting to /dashboard.");
-            res.redirect('/dashboard');
+        if (!res.rows[0].exists) {
+            console.log("[INFO] 'user_sessions' table not found. Creating table...");
+            await pgPool.query(`
+                CREATE TABLE user_sessions (
+                  sid VARCHAR(255) NOT NULL PRIMARY KEY,
+                  sess JSONB NOT NULL,
+                  expire BIGINT NOT NULL
+                );
+            `);
+            console.log("✅ 'user_sessions' table created successfully!");
         } else {
-            console.error("[ERROR] OAuth2 Callback: User not authenticated after successful Passport auth. This should not happen.");
-            res.redirect('/');
+            console.log("✅ 'user_sessions' table already exists.");
         }
-    }
-);
-
-app.get('/dashboard', ensureAuthenticated, (req, res) => {
-    console.log("[DEBUG] Accessing /dashboard. isAuthenticated:", req.isAuthenticated());
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-
-app.get('/user', ensureAuthenticated, (req, res) => {
-    console.log("[DEBUG] Accessing /user. isAuthenticated:", req.isAuthenticated());
-    console.log("[DEBUG] /user: Sending user data for ID:", req.user ? req.user.id : 'N/A');
-    res.json(req.user);
-});
-
-app.get('/bot-guilds', ensureAuthenticated, async (req, res) => {
-    console.log("[DEBUG] Accessing /bot-guilds. isAuthenticated:", req.isAuthenticated());
-    if (!DISCORD_BOT_TOKEN) {
-        console.error("[ERROR] /bot-guilds: DISCORD_BOT_TOKEN is not set in environment variables.");
-        return res.status(500).json({ message: "Bot token not configured on the server." });
-    }
-
-    try {
-        const response = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
-            headers: {
-                Authorization: `Bot ${DISCORD_BOT_TOKEN}`
-            }
-        });
-        const botGuilds = response.data;
-        console.log(`[DEBUG] /bot-guilds: Successfully fetched ${botGuilds.length} guilds for the bot.`);
-        res.json(botGuilds);
     } catch (error) {
-        console.error("[ERROR] Failed to fetch bot guilds from Discord API:", error.message);
-        if (error.response) {
-            console.error("Discord API response error data:", error.response.data);
-            console.error("Discord API response status:", error.response.status);
-        }
-        res.status(500).json({ message: "Failed to fetch bot guilds." });
+        console.error("❌ Database initialization failed:", error.message);
+        // If database initialization fails, the app cannot function, so exit.
+        process.exit(1);
     }
-});
-
-app.post('/api/settings/advanced/:guildId', ensureAuthenticated, (req, res) => {
-    const { guildId } = req.params;
-    const settings = req.body;
-    console.log(`[DEBUG] Received advanced settings for guild ${guildId}:`, settings);
-    res.status(200).json({ message: `Advanced settings for guild ${guildId} saved successfully (simulated).` });
-});
-
-app.post('/api/send-announcement/:guildId', ensureAuthenticated, async (req, res) => {
-    const { guildId } = req.params;
-    const { channelId, embedData } = req.body;
-
-    console.log(`[DEBUG] Attempting to send announcement for guild ${guildId} to channel ${channelId}.`);
-
-    if (!DISCORD_BOT_TOKEN) {
-        console.error("[ERROR] /api/send-announcement: DISCORD_BOT_TOKEN is not set.");
-        return res.status(500).json({ message: "Bot token not configured on the server." });
-    }
-    if (!channelId || !embedData) {
-        console.error("[ERROR] /api/send-announcement: Missing channelId or embedData in request body.");
-        return res.status(400).json({ message: "Missing channelId or embedData." });
-    }
-
-    try {
-        const discordApiUrl = `https://discord.com/api/v10/channels/${channelId}/messages`;
-        const payload = {
-            embeds: [embedData],
-        };
-
-        const response = await axios.post(discordApiUrl, payload, {
-            headers: {
-                'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log(`[DEBUG] Announcement sent successfully to channel ${channelId}. Discord API response status: ${response.status}`);
-        res.status(200).json({ message: "Announcement sent successfully!", discordResponse: response.data });
-    } catch (error) {
-        console.error("[ERROR] Failed to send announcement via Discord API:", error.message);
-        if (error.response) {
-            console.error("Discord API response error data:", error.response.data);
-            console.error("Discord API response status:", error.response.status);
-        }
-        res.status(500).json({ message: "Failed to send announcement.", error: error.message, discordApiError: error.response ? error.response.data : null });
-    }
-});
-
-app.get('/logout', (req, res) => {
-    console.log("[DEBUG] /logout: Attempting logout for user:", req.user ? req.user.id : 'N/A');
-    req.logout((err) => {
-        if (err) {
-            console.error("Error during logout:", err);
-            return res.status(500).send("Error during logout.");
-        }
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("Error destroying session:", err);
-                return res.status(500).send("Error destroying session.");
-            }
-            console.log("[DEBUG] Session destroyed. Redirecting to /.");
-            res.redirect('/');
-        });
-    });
-});
-
-app.get('/', (req, res) => {
-    console.log("[DEBUG] Accessing / (login page). isAuthenticated:", req.isAuthenticated());
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Start the server
-try {
-    app.listen(PORT, () => {
-        console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
-        console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
-        console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
-    });
-} catch (startupError) {
-    console.error("[CRITICAL ERROR] Failed to start Express server:", startupError.message);
-    process.exit(1);
 }
+
+// Call database initialization before setting up session middleware
+initDatabase().then(() => {
+    app.use(session({
+        store: new pgSession({
+            pool : pgPool,                // Connection pool
+            tableName : 'user_sessions'   // Use a custom table name for sessions
+        }),
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 60000 * 60 * 24, // Session lasts 24 hours
+            secure: process.env.NODE_ENV === 'production' || REDIRECT_URI.startsWith('https://'),
+            httpOnly: true,
+            sameSite: 'Lax'
+        }
+    }));
+    console.log(`[DEBUG] Session cookie 'secure' setting applied: ${app.get('env') === 'production' || REDIRECT_URI.startsWith('https://')}`);
+
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    app.use(express.json());
+    app.use(express.static(path.join(__dirname, 'public')));
+
+    // Middleware to check if user is authenticated
+    function ensureAuthenticated(req, res, next) {
+        console.log(`[DEBUG] ensureAuthenticated: Path: ${req.path}, SessionID: ${req.sessionID}`);
+        console.log(`[DEBUG] ensureAuthenticated: req.session.passport =`, req.session.passport);
+        console.log(`[DEBUG] ensureAuthenticated: req.isAuthenticated() = ${req.isAuthenticated()}`);
+        console.log(`[DEBUG] ensureAuthenticated: req.session =`, req.session);
+        console.log(`[DEBUG] ensureAuthenticated: req.user =`, req.user);
+
+        if (req.isAuthenticated()) {
+            console.log("[DEBUG] ensureAuthenticated: User is authenticated. User ID:", req.user ? req.user.id : 'N/A');
+            return next();
+        }
+        console.log("[DEBUG] ensureAuthenticated: User not authenticated for path:", req.path, "Redirecting to /");
+        res.redirect('/');
+    }
+
+    // --- Routes ---
+    app.get('/login', (req, res, next) => {
+        console.log("[DEBUG] /login: Initiating Discord OAuth.");
+        passport.authenticate('discord')(req, res, next);
+    });
+
+    app.get('/auth/discord/callback',
+        passport.authenticate('discord', { failureRedirect: '/' }),
+        (req, res) => {
+            console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
+            console.log("[DEBUG] OAuth2 Callback: Session ID after auth:", req.sessionID);
+            if (req.isAuthenticated()) {
+                console.log("[DEBUG] OAuth2 Callback: User authenticated, redirecting to /dashboard.");
+                res.redirect('/dashboard');
+            } else {
+                console.error("[ERROR] OAuth2 Callback: User not authenticated after successful Passport auth. This should not happen.");
+                res.redirect('/');
+            }
+        }
+    );
+
+    app.get('/dashboard', ensureAuthenticated, (req, res) => {
+        console.log("[DEBUG] Accessing /dashboard. isAuthenticated:", req.isAuthenticated());
+        res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    });
+
+    app.get('/user', ensureAuthenticated, (req, res) => {
+        console.log("[DEBUG] Accessing /user. isAuthenticated:", req.isAuthenticated());
+        console.log("[DEBUG] /user: Sending user data for ID:", req.user ? req.user.id : 'N/A');
+        res.json(req.user);
+    });
+
+    app.get('/bot-guilds', ensureAuthenticated, async (req, res) => {
+        console.log("[DEBUG] Accessing /bot-guilds. isAuthenticated:", req.isAuthenticated());
+        if (!DISCORD_BOT_TOKEN) {
+            console.error("[ERROR] /bot-guilds: DISCORD_BOT_TOKEN is not set in environment variables.");
+            return res.status(500).json({ message: "Bot token not configured on the server." });
+        }
+
+        try {
+            const response = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
+                headers: {
+                    Authorization: `Bot ${DISCORD_BOT_TOKEN}`
+                }
+            });
+            const botGuilds = response.data;
+            console.log(`[DEBUG] /bot-guilds: Successfully fetched ${botGuilds.length} guilds for the bot.`);
+            res.json(botGuilds);
+        } catch (error) {
+            console.error("[ERROR] Failed to fetch bot guilds from Discord API:", error.message);
+            if (error.response) {
+                console.error("Discord API response error data:", error.response.data);
+                console.error("Discord API response status:", error.response.status);
+            }
+            res.status(500).json({ message: "Failed to fetch bot guilds." });
+        }
+    });
+
+    app.post('/api/settings/advanced/:guildId', ensureAuthenticated, (req, res) => {
+        const { guildId } = req.params;
+        const settings = req.body;
+        console.log(`[DEBUG] Received advanced settings for guild ${guildId}:`, settings);
+        res.status(200).json({ message: `Advanced settings for guild ${guildId} saved successfully (simulated).` });
+    });
+
+    app.post('/api/send-announcement/:guildId', ensureAuthenticated, async (req, res) => {
+        const { guildId } = req.params;
+        const { channelId, embedData } = req.body;
+
+        console.log(`[DEBUG] Attempting to send announcement for guild ${guildId} to channel ${channelId}.`);
+
+        if (!DISCORD_BOT_TOKEN) {
+            console.error("[ERROR] /api/send-announcement: DISCORD_BOT_TOKEN is not set.");
+            return res.status(500).json({ message: "Bot token not configured on the server." });
+        }
+        if (!channelId || !embedData) {
+            console.error("[ERROR] /api/send-announcement: Missing channelId or embedData in request body.");
+            return res.status(400).json({ message: "Missing channelId or embedData." });
+        }
+
+        try {
+            const discordApiUrl = `https://discord.com/api/v10/channels/${channelId}/messages`;
+            const payload = {
+                embeds: [embedData],
+            };
+
+            const response = await axios.post(discordApiUrl, payload, {
+                headers: {
+                    'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log(`[DEBUG] Announcement sent successfully to channel ${channelId}. Discord API response status: ${response.status}`);
+            res.status(200).json({ message: "Announcement sent successfully!", discordResponse: response.data });
+        } catch (error) {
+            console.error("[ERROR] Failed to send announcement via Discord API:", error.message);
+            if (error.response) {
+                console.error("Discord API response error data:", error.response.data);
+                console.error("Discord API response status:", error.response.status);
+            }
+            res.status(500).json({ message: "Failed to send announcement.", error: error.message, discordApiError: error.response ? error.response.data : null });
+        }
+    });
+
+    app.get('/logout', (req, res) => {
+        console.log("[DEBUG] /logout: Attempting logout for user:", req.user ? req.user.id : 'N/A');
+        req.logout((err) => {
+            if (err) {
+                console.error("Error during logout:", err);
+                return res.status(500).send("Error during logout.");
+            }
+            req.session.destroy((err) => {
+                if (err) {
+                    console.error("Error destroying session:", err);
+                    return res.status(500).send("Error destroying session.");
+                }
+                console.log("[DEBUG] Session destroyed. Redirecting to /.");
+                res.redirect('/');
+            });
+        });
+    });
+
+    app.get('/', (req, res) => {
+        console.log("[DEBUG] Accessing / (login page). isAuthenticated:", req.isAuthenticated());
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+
+    // Start the server
+    try {
+        app.listen(PORT, () => {
+            console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
+            console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
+            console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
+        });
+    } catch (startupError) {
+        console.error("[CRITICAL ERROR] Failed to start Express server:", startupError.message);
+        process.exit(1);
+    }
+}).catch(err => {
+    console.error("❌ Failed to initialize database and start application:", err);
+    process.exit(1);
+});
