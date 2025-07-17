@@ -3,36 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroPoint Dashboard</title>
+    <title>ZeroPoint Dashboard - Advanced</title>
+    <!-- Tailwind CSS CDN for utility classes -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <style>
-        /* Base Styles */
+        /* Base Styles: Setting up the primary font, background, and text color */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A; /* Deepest dark background */
-            color: #EAEAEA; /* Light text */
-            min-height: 100vh;
+            background-color: #0A0A0A; /* Deepest dark background for contrast */
+            color: #EAEAEA; /* Light text for readability */
+            min-height: 100vh; /* Ensure body takes full viewport height */
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            position: relative;
-            z-index: 1;
+            overflow-x: hidden; /* Prevent horizontal scroll on small screens */
+            position: relative; /* For z-index stacking context */
+            z-index: 1; /* Ensure content is above background effects */
         }
 
-        /* Animated Background Gradients */
+        /* Animated Background Gradients: Creating subtle, moving light sources */
         .background-gradient-top {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 60%;
-            background: radial-gradient(circle at 15% 15%, rgba(95, 158, 160, 0.08) 0%, transparent 60%);
-            animation: moveGradientTop 30s infinite alternate ease-in-out;
-            pointer-events: none;
-            z-index: -2;
-            filter: blur(120px);
+            background: radial-gradient(circle at 15% 15%, rgba(95, 158, 160, 0.08) 0%, transparent 60%); /* Cadet Blue subtle glow */
+            animation: moveGradientTop 30s infinite alternate ease-in-out; /* Slow, smooth animation */
+            pointer-events: none; /* Allow clicks to pass through */
+            z-index: -2; /* Behind the main content */
+            filter: blur(120px); /* Heavy blur for ethereal effect */
         }
         .background-gradient-bottom {
             position: fixed;
@@ -40,13 +45,14 @@
             right: 0;
             width: 100%;
             height: 60%;
-            background: radial-gradient(circle at 85% 85%, rgba(70, 130, 180, 0.08) 0%, transparent 60%);
-            animation: moveGradientBottom 30s infinite alternate-reverse ease-in-out;
+            background: radial-gradient(circle at 85% 85%, rgba(70, 130, 180, 0.08) 0%, transparent 60%); /* Steel Blue subtle glow */
+            animation: moveGradientBottom 30s infinite alternate-reverse ease-in-out; /* Reversed animation for variety */
             pointer-events: none;
             z-index: -2;
             filter: blur(120px);
         }
 
+        /* Keyframe animations for background gradients */
         @keyframes moveGradientTop {
             0% { transform: translate(0, 0) scale(1); }
             50% { transform: translate(10%, 10%) scale(1.1); }
@@ -58,7 +64,7 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* Subtle Noise Overlay */
+        /* Subtle Noise Overlay: Adding a slight texture for depth */
         body::before {
             content: '';
             position: fixed;
@@ -66,14 +72,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
-            background-size: 100px;
-            opacity: 0.01;
-            z-index: -1;
+            /* SVG data for a subtle noise pattern */
+            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcn48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
+            background-size: 100px; /* Size of the noise pattern */
+            opacity: 0.01; /* Very subtle */
+            z-index: -1; /* Between gradients and content */
             pointer-events: none;
         }
 
-        /* Starfield Effect */
+        /* Starfield Effect: Adding a dynamic background of twinkling stars */
         .starfield {
             position: fixed;
             top: 0;
@@ -81,11 +88,12 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -3;
+            z-index: -3; /* Furthest back */
             background: transparent;
-            animation: twinkle 150s linear infinite;
+            animation: twinkle 150s linear infinite; /* Very slow, long animation */
         }
 
+        /* Pseudo-elements for star generation */
         .starfield::before, .starfield::after {
             content: '';
             position: absolute;
@@ -95,6 +103,7 @@
             height: 1px;
             background: white;
             border-radius: 50%;
+            /* Extensive box-shadow for numerous stars at varying positions */
             box-shadow:
                 -200px 100px #fff, 150px 200px #fff, 300px 50px #fff, 400px 250px #fff, -100px 300px #fff,
                 50px 400px #fff, 250px 150px #fff, 350px 350px #fff, -50px 50px #fff, 100px 280px #fff,
@@ -113,6 +122,7 @@
                 250px 950px #bbb, 700px 750px #bbb, -650px 450px #bbb, 1000px 850px #bbb, -350px 1100px #bbb;
         }
 
+        /* Keyframe animation for star twinkling/movement */
         @keyframes twinkle {
             0% { transform: translate(0, 0); opacity: 1; }
             25% { transform: translate(1%, -1%); opacity: 0.9; }
@@ -125,39 +135,39 @@
         .glass-container {
             background-color: rgba(26, 26, 26, 0.6); /* Slightly transparent dark background */
             border: 1px solid rgba(58, 58, 58, 0.4); /* Transparent border */
-            backdrop-filter: blur(10px); /* Glassmorphism blur */
-            -webkit-backdrop-filter: blur(10px); /* Safari support */
-            border-radius: 1rem; /* More rounded corners */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Softer, deeper shadow */
-            transition: all 0.3s ease-in-out;
+            backdrop-filter: blur(10px); /* Glassmorphism blur effect */
+            -webkit-backdrop-filter: blur(10px); /* Safari support for backdrop-filter */
+            border-radius: 1rem; /* More rounded corners for modern feel */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Softer, deeper shadow for depth */
+            transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
         }
         .glass-container:hover {
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); /* Enhanced shadow on hover */
             border-color: rgba(95, 158, 160, 0.6); /* Accent border on hover */
         }
 
-        /* Header Background */
+        /* Header Styling with Glassmorphism */
         header {
-            background-color: rgba(26, 26, 26, 0.8); /* More opaque for header */
+            background-color: rgba(26, 26, 26, 0.8); /* More opaque for header visibility */
             border-bottom: 1px solid rgba(58, 58, 58, 0.4);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
 
-        /* Logout Button */
+        /* Logout Button Styling */
         .btn-logout {
-            background-color: #DC2626; /* Red-600 */
-            transition: background-color 0.3s ease;
-            border-radius: 0.5rem; /* Rounded corners */
+            background-color: #DC2626; /* Red-600 from Tailwind palette */
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform for subtle hover */
+            border-radius: 0.5rem;
             padding: 0.6rem 1.2rem;
             font-weight: 600;
         }
         .btn-logout:hover {
-            background-color: #B91C1C; /* Red-700 */
-            transform: translateY(-1px);
+            background-color: #B91C1C; /* Darker red on hover */
+            transform: translateY(-1px); /* Slight lift on hover */
         }
 
-        /* Accent Colors */
+        /* Accent Colors (Cadet Blue and Steel Blue) */
         .accent-color {
             color: #5F9EA0; /* Cadet Blue */
         }
@@ -168,7 +178,7 @@
             border-color: #5F9EA0;
         }
 
-        /* Card Styling for settings sections (inherits glass-container) */
+        /* Card Styling for settings sections (inherits glass-container properties) */
         .card {
             background-color: rgba(10, 10, 10, 0.7); /* Slightly darker transparent for cards */
             border: 1px solid rgba(58, 58, 58, 0.3);
@@ -180,18 +190,18 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transform: translateY(-3px); /* Lift card on hover */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* Deeper shadow on hover */
             border-color: rgba(95, 158, 160, 0.5); /* Accent border on hover */
         }
 
-        /* Input Fields */
+        /* Input Fields Styling */
         .input-field {
             background-color: rgba(40, 40, 40, 0.7); /* Transparent dark for inputs */
             border: 1px solid rgba(85, 85, 85, 0.5);
             color: #EAEAEA;
             padding: 0.75rem;
-            border-radius: 0.5rem; /* More rounded */
+            border-radius: 0.5rem;
             width: 100%;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
@@ -201,7 +211,7 @@
             box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.4); /* Wider, softer focus glow */
         }
 
-        /* Guild Card in Sidebar */
+        /* Guild Card in Sidebar Styling */
         .guild-card {
             cursor: pointer;
             transition: all 0.2s ease;
@@ -222,7 +232,7 @@
             box-shadow: 0 0 0 2px rgba(95, 158, 160, 0.5);
         }
 
-        /* Save Button */
+        /* Save Button Styling */
         .save-button {
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
             border-radius: 0.5rem;
@@ -242,7 +252,7 @@
             box-shadow: none;
         }
 
-        /* Status Message */
+        /* Status Message Styling (for success/error feedback) */
         .status-message {
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
@@ -257,7 +267,7 @@
             color: #F44336; /* Red */
         }
 
-        /* Custom Scrollbar */
+        /* Custom Scrollbar Styling for a sleek look */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -273,12 +283,12 @@
             background: #4682B4; /* Steel Blue on hover */
         }
 
-        /* Embed Preview Specific Styles */
+        /* Embed Preview Specific Styles (for Discord-like embeds) */
         .embed-preview {
             border: 1px solid rgba(107, 114, 128, 0.5); /* Lighter, transparent border */
-            border-left: 5px solid var(--embed-color, #4299e1); /* Default blue */
+            border-left: 5px solid var(--embed-color, #4299e1); /* Dynamic left border color */
             padding: 1rem;
-            border-radius: 0.5rem; /* More rounded */
+            border-radius: 0.5rem;
             background-color: rgba(44, 49, 58, 0.8); /* Transparent dark for embed preview */
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -306,136 +316,311 @@
             color: #a0aec0;
             margin-top: 0.5rem;
         }
+
+        /* Modal Specific Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: rgba(26, 26, 26, 0.9);
+            border: 1px solid rgba(58, 58, 58, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            width: 90%;
+            max-width: 500px;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .modal-button.confirm {
+            background-color: #5F9EA0;
+            color: white;
+        }
+        .modal-button.confirm:hover {
+            background-color: #4682B4;
+            transform: translateY(-1px);
+        }
+        .modal-button.cancel {
+            background-color: #4A4A4A;
+            color: #EAEAEA;
+        }
+        .modal-button.cancel:hover {
+            background-color: #6A6A6A;
+            transform: translateY(-1px);
+        }
+
+        /* Sidebar Navigation Items */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            color: #B0B0B0; /* Lighter gray for inactive items */
+        }
+        .sidebar-item:hover {
+            background-color: rgba(58, 58, 58, 0.5); /* Darker transparent on hover */
+            color: #EAEAEA;
+        }
+        .sidebar-item.active {
+            background-color: #5F9EA0; /* Accent background for active item */
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(95, 158, 160, 0.3);
+        }
+        .sidebar-item.active .sidebar-icon {
+            color: white; /* Ensure icon is white when active */
+        }
+        .sidebar-icon {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+            color: #B0B0B0; /* Default icon color */
+        }
+
+        /* Chart styling */
+        .chart-container {
+            position: relative;
+            height: 300px; /* Fixed height for charts */
+            width: 100%;
+        }
     </style>
 </head>
 <body class="p-4">
+    <!-- Background visual effects -->
     <div class="background-gradient-top"></div>
     <div class="background-gradient-bottom"></div>
     <div class="starfield"></div>
 
-    <header class="w-full p-4 shadow-md flex justify-between items-center z-10">
-        <div class="flex items-center">
-            <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Logo" class="w-10 h-10 rounded-full mr-3">
-            <h1 class="text-2xl font-bold text-white">ZeroPoint Dashboard</h1>
+    <!-- Header Section -->
+    <header class="w-full p-4 shadow-md flex flex-col sm:flex-row justify-between items-center z-10 rounded-lg mb-6">
+        <div class="flex items-center mb-4 sm:mb-0">
+            <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Logo" class="w-12 h-12 rounded-full mr-3 border-2 border-indigo-400">
+            <h1 class="text-3xl font-extrabold text-white tracking-wide">ZeroPoint Dashboard</h1>
         </div>
         <div class="flex items-center space-x-4">
-            <span class="text-gray-300">Logged in as <span id="username" class="font-semibold text-indigo-400"></span></span>
-            <a href="/logout" class="px-4 py-2 text-sm font-medium rounded-md btn-logout">Logout</a>
+            <span class="text-gray-300 text-lg">Logged in as <span id="username" class="font-semibold text-indigo-400">Loading...</span></span>
+            <a href="/logout" class="px-6 py-3 text-base font-medium rounded-lg btn-logout shadow-md hover:shadow-lg">Logout</a>
         </div>
     </header>
 
-    <main class="flex-1 flex flex-col md:flex-row p-6 gap-6 max-w-7xl mx-auto w-full relative z-10">
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col lg:flex-row p-6 gap-8 max-w-8xl mx-auto w-full relative z-10">
         <!-- Guild Selection Sidebar -->
-        <aside class="w-full md:w-1/4 p-4 rounded-lg shadow-lg glass-container h-full overflow-y-auto">
-            <h2 class="text-xl font-semibold mb-4 text-white">Your Servers</h2>
-            <p class="text-gray-400 text-sm mb-4">Select a server to manage bot settings.</p>
-            <p id="guildsHeader" class="text-gray-300 mt-4 hidden">Your Guilds (where bot is present):</p>
-            <ul id="guildList" class="space-y-2">
-                <!-- Guilds will be populated here -->
-                <li class="text-gray-400">Loading guilds...</li>
+        <aside class="w-full lg:w-1/4 p-6 rounded-xl shadow-xl glass-container h-full overflow-y-auto flex-shrink-0">
+            <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-3">Your Servers</h2>
+            <p class="text-gray-400 text-sm mb-6">Select a server to configure ZeroPoint Bot settings.</p>
+            
+            <!-- Navigation for different setting categories -->
+            <nav class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-300 mb-3">Settings Categories</h3>
+                <ul>
+                    <li><a href="#" id="nav-general" class="sidebar-item active"><i class="fas fa-cogs sidebar-icon"></i> General</a></li>
+                    <li><a href="#" id="nav-welcome" class="sidebar-item"><i class="fas fa-hand-sparkles sidebar-icon"></i> Welcome & Farewell</a></li>
+                    <li><a href="#" id="nav-logging" class="sidebar-item"><i class="fas fa-clipboard-list sidebar-icon"></i> Logging</a></li>
+                    <li><a href="#" id="nav-ticket" class="sidebar-item"><i class="fas fa-headset sidebar-icon"></i> Ticket System</a></li>
+                    <li><a href="#" id="nav-verification" class="sidebar-item"><i class="fas fa-user-check sidebar-icon"></i> Verification</a></li>
+                    <li><a href="#" id="nav-custom-commands" class="sidebar-item"><i class="fas fa-terminal sidebar-icon"></i> Custom Commands</a></li>
+                    <li><a href="#" id="nav-reaction-roles" class="sidebar-item"><i class="fas fa-hand-pointer sidebar-icon"></i> Reaction Roles</a></li>
+                    <li><a href="#" id="nav-leveling" class="sidebar-item"><i class="fas fa-trophy sidebar-icon"></i> Leveling System</a></li>
+                    <li><a href="#" id="nav-music" class="sidebar-item"><i class="fas fa-music sidebar-icon"></i> Music Bot</a></li>
+                    <li><a href="#" id="nav-integrations" class="sidebar-item"><i class="fas fa-puzzle-piece sidebar-icon"></i> Integrations</a></li>
+                    <li><a href="#" id="nav-analytics" class="sidebar-item"><i class="fas fa-chart-line sidebar-icon"></i> Server Analytics</a></li>
+                    <li><a href="#" id="nav-audit-log" class="sidebar-item"><i class="fas fa-history sidebar-icon"></i> Audit Log</a></li>
+                    <li><a href="#" id="nav-advanced" class="sidebar-item"><i class="fas fa-sliders-h sidebar-icon"></i> Advanced</a></li>
+                    <li><a href="#" id="nav-announcement" class="sidebar-item"><i class="fas fa-bullhorn sidebar-icon"></i> Announcement Builder</a></li>
+                </ul>
+            </nav>
+
+            <h3 id="guildsHeader" class="text-lg font-semibold text-gray-300 mb-3 mt-6 border-t border-gray-700 pt-3">Your Guilds (Bot Present):</h3>
+            <ul id="guildList" class="space-y-3">
+                <!-- Guilds will be dynamically populated here -->
+                <li class="text-gray-400 p-3">Loading servers...</li>
             </ul>
         </aside>
 
-        <!-- Main Content Area (Dashboard Settings) -->
-        <section class="flex-1 p-6 rounded-lg shadow-lg glass-container">
-            <h2 class="text-xl font-semibold mb-6 text-white">Bot Settings for <span id="selectedGuildName" class="accent-color">No Server Selected</span></h2>
+        <!-- Main Settings Content Area -->
+        <section class="flex-1 p-8 rounded-xl shadow-xl glass-container overflow-y-auto">
+            <h2 class="text-3xl font-bold mb-8 text-white border-b border-gray-700 pb-4">Settings for <span id="selectedGuildName" class="accent-color">No Server Selected</span></h2>
 
+            <!-- Message when no guild is selected -->
+            <div id="noGuildSelected" class="text-center text-gray-400 mt-24">
+                <p class="text-2xl font-semibold mb-4">👋 Welcome!</p>
+                <p class="text-lg">Please select a server from the left sidebar to manage its settings.</p>
+                <p class="text-sm mt-2">Only servers where the ZeroPoint Bot is present will be listed here.</p>
+                <p class="text-sm mt-4">If you don't see your server, ensure the bot has been invited and has the necessary permissions.</p>
+            </div>
+
+            <!-- Settings Content (hidden by default) -->
             <div id="settingsContent" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-8">
                     <!-- General Settings Card -->
                     <div id="general-settings" class="card settings-section">
-                        <h3 class="text-lg font-semibold mb-4 text-white">General Settings</h3>
-                        <div class="mb-4">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-cogs mr-3 text-xl accent-color"></i> General Settings</h3>
+                        <div class="mb-5">
                             <label for="botPrefix" class="block text-gray-400 text-sm font-bold mb-2">Bot Prefix</label>
                             <input type="text" id="botPrefix" class="input-field" placeholder="e.g., !">
+                            <p class="text-xs text-gray-500 mt-1">The character your bot uses to listen for commands (e.g., `!help`).</p>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-5">
                             <label for="defaultRole" class="block text-gray-400 text-sm font-bold mb-2">Default New Member Role ID</label>
                             <input type="text" id="defaultRole" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Role ID to automatically assign to new members. Leave empty for none.</p>
                         </div>
-                        <button id="saveGeneralSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save General Settings</button>
-                        <p id="generalStatus" class="status-message text-sm mt-2"></p>
+                        <button id="saveGeneralSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save General Settings</button>
+                        <p id="generalStatus" class="status-message text-sm mt-3"></p>
                     </div>
 
-                    <!-- Welcome Message Settings Card -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Welcome Message</h3>
-                        <div class="mb-4">
-                            <label for="welcomeChannel" class="block text-gray-400 text-sm font-bold mb-2">Welcome Channel ID</label>
-                            <input type="text" id="welcomeChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                    <!-- Welcome & Farewell Message Settings Card -->
+                    <div id="welcome-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-hand-sparkles mr-3 text-xl accent-color"></i> Welcome & Farewell Messages</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-medium text-white mb-3">Welcome Settings</h4>
+                                <div class="mb-4">
+                                    <label for="welcomeChannel" class="block text-gray-400 text-sm font-bold mb-2">Welcome Channel ID</label>
+                                    <input type="text" id="welcomeChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                                    <p class="text-xs text-gray-500 mt-1">The channel where welcome messages will be sent.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="welcomeMessage" class="block text-gray-400 text-sm font-bold mb-2">Welcome Message</label>
+                                    <textarea id="welcomeMessage" class="input-field h-28 resize-y" placeholder="Welcome {user}!"></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Use `{user}` to mention the new member, `{guild}` for server name.</p>
+                                </div>
+                                <div class="flex items-center mb-4">
+                                    <input type="checkbox" id="welcomeDM" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                                    <label for="welcomeDM" class="text-gray-400 text-sm">Send Welcome DM?</label>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium text-white mb-3">Farewell Settings</h4>
+                                <div class="mb-4">
+                                    <label for="farewellChannel" class="block text-gray-400 text-sm font-bold mb-2">Farewell Channel ID</label>
+                                    <input type="text" id="farewellChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                                    <p class="text-xs text-gray-500 mt-1">The channel where farewell messages will be sent.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="farewellMessage" class="block text-gray-400 text-sm font-bold mb-2">Farewell Message</label>
+                                    <textarea id="farewellMessage" class="input-field h-28 resize-y" placeholder="{user} has left the server."></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Use `{user}` to mention the leaving member.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-4">
-                            <label for="welcomeMessage" class="block text-gray-400 text-sm font-bold mb-2">Welcome Message</label>
-                            <textarea id="welcomeMessage" class="input-field h-24 resize-y" placeholder="Welcome {user}!"></textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label for="welcomeDM" class="block text-gray-400 text-sm font-bold mb-2">Send Welcome DM?</label>
-                            <input type="checkbox" id="welcomeDM" class="form-checkbox h-5 w-5 text-accent rounded">
-                        </div>
-                        <button id="saveWelcomeSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Welcome Settings</button>
-                        <p id="welcomeStatus" class="status-message text-sm mt-2"></p>
+                        <button id="saveWelcomeSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mt-4">Save Welcome & Farewell Settings</button>
+                        <p id="welcomeStatus" class="status-message text-sm mt-3"></p>
                     </div>
 
                     <!-- Logging Settings Card -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Logging Settings</h3>
-                        <div class="mb-4">
+                    <div id="logging-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-clipboard-list mr-3 text-xl accent-color"></i> Logging Settings</h3>
+                        <div class="mb-5">
                             <label for="logChannel" class="block text-gray-400 text-sm font-bold mb-2">Log Channel ID</label>
                             <input type="text" id="logChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">All bot-related logs will be sent to this channel.</p>
                         </div>
-                        <div class="mb-4">
-                            <label for="logMessages" class="block text-gray-400 text-sm font-bold mb-2">Log Message Edits/Deletes?</label>
-                            <input type="checkbox" id="logMessages" class="form-checkbox h-5 w-5 text-accent rounded">
+                        <div class="flex items-center mb-3">
+                            <input type="checkbox" id="logMessages" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                            <label for="logMessages" class="text-gray-400 text-sm">Log Message Edits/Deletes?</label>
                         </div>
-                        <div class="mb-4">
-                            <label for="logChannels" class="block text-gray-400 text-sm font-bold mb-2">Log Channel Changes?</label>
-                            <input type="checkbox" id="logChannels" class="form-checkbox h-5 w-5 text-accent rounded">
+                        <div class="flex items-center mb-3">
+                            <input type="checkbox" id="logChannels" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                            <label for="logChannels" class="text-gray-400 text-sm">Log Channel Changes?</label>
                         </div>
-                        <button id="saveLoggingSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Logging Settings</button>
-                        <p id="loggingStatus" class="status-message text-sm mt-2"></p>
+                        <div class="flex items-center mb-5">
+                            <input type="checkbox" id="logMembers" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                            <label for="logMembers" class="text-gray-400 text-sm">Log Member Joins/Leaves?</label>
+                        </div>
+                        <button id="saveLoggingSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save Logging Settings</button>
+                        <p id="loggingStatus" class="status-message text-sm mt-3"></p>
                     </div>
 
                     <!-- Ticket System Settings Card -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Ticket System</h3>
-                        <div class="mb-4">
+                    <div id="ticket-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-headset mr-3 text-xl accent-color"></i> Ticket System</h3>
+                        <div class="mb-5">
                             <label for="ticketCategory" class="block text-gray-400 text-sm font-bold mb-2">Ticket Category ID</label>
                             <input type="text" id="ticketCategory" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">New tickets will be created under this category.</p>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-5">
                             <label for="ticketRole" class="block text-gray-400 text-sm font-bold mb-2">Support Role ID</label>
                             <input type="text" id="ticketRole" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Members with this role can manage tickets.</p>
                         </div>
-                        <button id="saveTicketSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Ticket Settings</button>
-                        <p id="ticketStatus" class="status-message text-sm mt-2"></p>
+                        <div class="mb-5">
+                            <label for="ticketMessage" class="block text-gray-400 text-sm font-bold mb-2">Ticket Welcome Message</label>
+                            <textarea id="ticketMessage" class="input-field h-24 resize-y" placeholder="Hello {user}! How can we help you today?"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Message sent when a new ticket is opened.</p>
+                        </div>
+                        <button id="saveTicketSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save Ticket Settings</button>
+                        <p id="ticketStatus" class="status-message text-sm mt-3"></p>
                     </div>
 
-                    <!-- Verification Settings Section (NEW) -->
+                    <!-- Verification Settings Section -->
                     <div id="verification-settings" class="card settings-section hidden">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Verification System Settings</h3>
-                        <div class="mb-4">
-                            <label for="verificationChannelId" class="block text-gray-400 text-sm font-bold mb-2">Verification Channel ID:</label>
-                            <input type="text" id="verificationChannelId" class="input-field" placeholder="Enter verification channel ID">
-                        </div>
-                        <div class="mb-4">
-                            <label for="unverifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Unverified Role ID:</label>
-                            <input type="text" id="unverifiedRoleId" class="input-field" placeholder="Enter unverified role ID">
-                        </div>
-                        <div class="mb-4">
-                            <label for="verifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Verified Role ID:</label>
-                            <input type="text" id="verifiedRoleId" class="input-field" placeholder="Enter verified role ID">
-                        </div>
-
-                        <h4 class="text-md font-semibold text-white mb-3 mt-6">Verification Message & Embed</h4>
-                        <div class="mb-4">
-                            <label for="verificationMessageContent" class="block text-gray-400 text-sm font-bold mb-2">Message Content (above embed):</label>
-                            <textarea id="verificationMessageContent" class="input-field h-24 resize-y" placeholder="Welcome {user}! Click the button below to verify."></textarea>
-                            <p class="text-sm text-gray-500 mt-1">Use `{user}` to mention the new member.</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-user-check mr-3 text-xl accent-color"></i> Verification System Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <h5 class="text-md font-medium text-white mb-2">Embed Builder</h5>
+                                <h4 class="text-lg font-medium text-white mb-3">Core Settings</h4>
+                                <div class="mb-4">
+                                    <label for="verificationChannelId" class="block text-gray-400 text-sm font-bold mb-2">Verification Channel ID:</label>
+                                    <input type="text" id="verificationChannelId" class="input-field" placeholder="Enter verification channel ID">
+                                    <p class="text-xs text-gray-500 mt-1">The channel where the verification message will be posted.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="unverifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Unverified Role ID:</label>
+                                    <input type="text" id="unverifiedRoleId" class="input-field" placeholder="Enter unverified role ID">
+                                    <p class="text-xs text-gray-500 mt-1">Role assigned to new members before verification.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="verifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Verified Role ID:</label>
+                                    <input type="text" id="verifiedRoleId" class="input-field" placeholder="Enter verified role ID">
+                                    <p class="text-xs text-gray-500 mt-1">Role assigned after successful verification.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="verificationMessageContent" class="block text-gray-400 text-sm font-bold mb-2">Message Content (above embed):</label>
+                                    <textarea id="verificationMessageContent" class="input-field h-24 resize-y" placeholder="Welcome {user}! Click the button below to verify."></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Optional text to appear above the verification embed.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium text-white mb-3">Embed Builder</h4>
                                 <div class="mb-3">
                                     <label for="verificationEmbedTitle" class="block text-gray-400 text-sm font-bold mb-1">Title:</label>
                                     <input type="text" id="verificationEmbedTitle" class="input-field" placeholder="Verification Embed Title">
@@ -456,9 +641,7 @@
                                     <label for="verificationEmbedThumbnail" class="block text-gray-400 text-sm font-bold mb-1">Thumbnail URL:</label>
                                     <input type="text" id="verificationEmbedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
                                 </div>
-                            </div>
-                            <div>
-                                <h5 class="text-md font-medium text-white mb-2">Embed Preview</h5>
+                                <h5 class="text-md font-medium text-white mb-2 mt-4">Embed Preview</h5>
                                 <div id="verification-embed-preview" class="embed-preview" style="--embed-color: #4299e1;">
                                     <div class="embed-title" id="preview-verification-embed-title">Verification Embed Title</div>
                                     <div class="embed-description" id="preview-verification-embed-description">Click the button to gain full access.</div>
@@ -467,141 +650,424 @@
                                 </div>
                             </div>
                         </div>
-                        <button id="saveVerificationSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity mt-6">Save Verification Settings</button>
-                        <p id="verificationStatus" class="status-message text-sm mt-2"></p>
+                        <button id="saveVerificationSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mt-6">Save Verification Settings</button>
+                        <p id="verificationStatus" class="status-message text-sm mt-3"></p>
                     </div>
-                    <!-- End Verification Settings Section -->
 
-                    <!-- Advanced Settings & Integrations Card -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Advanced Settings</h3>
+                    <!-- Custom Commands Section -->
+                    <div id="custom-commands-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-terminal mr-3 text-xl accent-color"></i> Custom Commands</h3>
                         <div class="mb-4">
-                            <label for="commandCooldown" class="block text-gray-400 text-sm font-bold mb-2">Command Cooldown (seconds)</label>
+                            <label for="newCommandName" class="block text-gray-400 text-sm font-bold mb-2">Command Name (e.g., `!hello`)</label>
+                            <input type="text" id="newCommandName" class="input-field" placeholder="e.g., hello">
+                        </div>
+                        <div class="mb-4">
+                            <label for="newCommandResponse" class="block text-gray-400 text-sm font-bold mb-2">Command Response</label>
+                            <textarea id="newCommandResponse" class="input-field h-24 resize-y" placeholder="Hello {user}!"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Use `{user}` to mention the user, `{channel}` for current channel.</p>
+                        </div>
+                        <div class="mb-4">
+                            <label for="newCommandType" class="block text-gray-400 text-sm font-bold mb-2">Response Type</label>
+                            <select id="newCommandType" class="input-field">
+                                <option value="text">Text</option>
+                                <option value="embed">Embed</option>
+                            </select>
+                        </div>
+                        <div id="newCommandEmbedFields" class="hidden border border-gray-700 p-4 rounded-md mb-4">
+                            <h4 class="text-lg font-medium text-white mb-3">Embed Details</h4>
+                            <div class="mb-3">
+                                <label for="newCommandEmbedTitle" class="block text-gray-400 text-sm font-bold mb-1">Embed Title:</label>
+                                <input type="text" id="newCommandEmbedTitle" class="input-field" placeholder="Embed Title">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newCommandEmbedDescription" class="block text-gray-400 text-sm font-bold mb-1">Embed Description:</label>
+                                <textarea id="newCommandEmbedDescription" class="input-field h-20 resize-y" placeholder="Embed Description"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newCommandEmbedColor" class="block text-gray-400 text-sm font-bold mb-1">Embed Color (Hex):</label>
+                                <input type="text" id="newCommandEmbedColor" class="input-field" placeholder="#5F9EA0">
+                            </div>
+                        </div>
+                        <button id="addCustomCommand" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mb-6">Add Custom Command</button>
+                        <p id="customCommandStatus" class="status-message text-sm mt-3"></p>
+
+                        <h4 class="text-lg font-semibold text-white mb-4 border-t border-gray-700 pt-4">Existing Commands</h4>
+                        <ul id="customCommandsList" class="space-y-3">
+                            <li class="text-gray-400">No custom commands added yet.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Reaction Roles Section -->
+                    <div id="reaction-roles-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-hand-pointer mr-3 text-xl accent-color"></i> Reaction Roles</h3>
+                        <div class="mb-4">
+                            <label for="reactionRoleChannelId" class="block text-gray-400 text-sm font-bold mb-2">Channel ID for Reaction Role Message</label>
+                            <input type="text" id="reactionRoleChannelId" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <div class="mb-4">
+                            <label for="reactionRoleMessageContent" class="block text-gray-400 text-sm font-bold mb-2">Message Content</label>
+                            <textarea id="reactionRoleMessageContent" class="input-field h-24 resize-y" placeholder="React to get roles!"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="reactionRoleEmoji" class="block text-gray-400 text-sm font-bold mb-2">Emoji (e.g., 👍)</label>
+                            <input type="text" id="reactionRoleEmoji" class="input-field" placeholder="e.g., 👍">
+                        </div>
+                        <div class="mb-4">
+                            <label for="reactionRoleRoleId" class="block text-gray-400 text-sm font-bold mb-2">Role ID to Assign</label>
+                            <input type="text" id="reactionRoleRoleId" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <button id="addReactionRole" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mb-6">Add Reaction Role</button>
+                        <p id="reactionRoleStatus" class="status-message text-sm mt-3"></p>
+
+                        <h4 class="text-lg font-semibold text-white mb-4 border-t border-gray-700 pt-4">Configured Reaction Roles</h4>
+                        <ul id="reactionRolesList" class="space-y-3">
+                            <li class="text-gray-400">No reaction roles configured yet.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Leveling System Settings -->
+                    <div id="leveling-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-trophy mr-3 text-xl accent-color"></i> Leveling System</h3>
+                        <div class="mb-5">
+                            <label for="xpPerMessage" class="block text-gray-400 text-sm font-bold mb-2">XP per Message</label>
+                            <input type="number" id="xpPerMessage" class="input-field" min="1" value="15">
+                        </div>
+                        <div class="mb-5">
+                            <label for="xpCooldown" class="block text-gray-400 text-sm font-bold mb-2">XP Cooldown (seconds)</label>
+                            <input type="number" id="xpCooldown" class="input-field" min="5" value="60">
+                        </div>
+                        <div class="mb-5">
+                            <label for="levelUpMessage" class="block text-gray-400 text-sm font-bold mb-2">Level Up Message</label>
+                            <textarea id="levelUpMessage" class="input-field h-24 resize-y" placeholder="Congratulations {user}, you reached level {level}!"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Use `{user}` for member, `{level}` for new level.</p>
+                        </div>
+                        <div class="mb-5">
+                            <label for="levelUpChannel" class="block text-gray-400 text-sm font-bold mb-2">Level Up Announcement Channel ID</label>
+                            <input type="text" id="levelUpChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Leave empty to send in current channel.</p>
+                        </div>
+                        <h4 class="text-lg font-semibold text-white mb-4 border-t border-gray-700 pt-4">Level Rewards</h4>
+                        <div class="mb-4">
+                            <label for="rewardLevel" class="block text-gray-400 text-sm font-bold mb-2">Level</label>
+                            <input type="number" id="rewardLevel" class="input-field" min="1">
+                        </div>
+                        <div class="mb-4">
+                            <label for="rewardRoleId" class="block text-gray-400 text-sm font-bold mb-2">Role ID to Grant</label>
+                            <input type="text" id="rewardRoleId" class="input-field" placeholder="e.g., 123456789012345678">
+                        </div>
+                        <button id="addLevelReward" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mb-6">Add Level Reward</button>
+                        <p id="levelingStatus" class="status-message text-sm mt-3"></p>
+                        <h4 class="text-lg font-semibold text-white mb-4 border-t border-gray-700 pt-4">Configured Level Rewards</h4>
+                        <ul id="levelRewardsList" class="space-y-3">
+                            <li class="text-gray-400">No level rewards configured yet.</li>
+                        </ul>
+                        <button id="saveLevelingSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mt-6">Save Leveling Settings</button>
+                    </div>
+
+                    <!-- Music Bot Settings -->
+                    <div id="music-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-music mr-3 text-xl accent-color"></i> Music Bot Settings</h3>
+                        <div class="mb-5">
+                            <label for="musicChannel" class="block text-gray-400 text-sm font-bold mb-2">Default Music Channel ID</label>
+                            <input type="text" id="musicChannel" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Bot will prioritize joining this voice channel.</p>
+                        </div>
+                        <div class="mb-5">
+                            <label for="djRoleId" class="block text-gray-400 text-sm font-bold mb-2">DJ Role ID</label>
+                            <input type="text" id="djRoleId" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Only members with this role can use music commands (optional).</p>
+                        </div>
+                        <div class="flex items-center mb-5">
+                            <input type="checkbox" id="allowAnyoneQueue" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                            <label for="allowAnyoneQueue" class="text-gray-400 text-sm">Allow Anyone to Queue Songs?</label>
+                        </div>
+                        <button id="saveMusicSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save Music Settings</button>
+                        <p id="musicStatus" class="status-message text-sm mt-3"></p>
+                    </div>
+
+                    <!-- Integrations Settings -->
+                    <div id="integrations-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-puzzle-piece mr-3 text-xl accent-color"></i> Integrations</h3>
+                        <p class="text-gray-400 mb-6">Configure connections to external services.</p>
+
+                        <h4 class="text-lg font-medium text-white mb-3">Webhook Integration</h4>
+                        <div class="mb-4">
+                            <label for="webhookUrl" class="block text-gray-400 text-sm font-bold mb-2">Webhook URL</label>
+                            <input type="url" id="webhookUrl" class="input-field" placeholder="https://discord.com/api/webhooks/...">
+                            <p class="text-xs text-gray-500 mt-1">For sending custom messages via webhooks.</p>
+                        </div>
+                        <div class="mb-5">
+                            <label for="webhookChannelId" class="block text-gray-400 text-sm font-bold mb-2">Webhook Target Channel ID</label>
+                            <input type="text" id="webhookChannelId" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">The channel where webhook messages will be sent.</p>
+                        </div>
+                        <button id="saveIntegrationsSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save Integrations</button>
+                        <p id="integrationsStatus" class="status-message text-sm mt-3"></p>
+                    </div>
+
+                    <!-- Server Analytics Section -->
+                    <div id="analytics-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-chart-line mr-3 text-xl accent-color"></i> Server Analytics</h3>
+                        <p class="text-gray-400 mb-6">View key statistics for your server.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            <div class="p-4 bg-gray-800 rounded-lg shadow-inner text-center">
+                                <p class="text-sm text-gray-400">Total Members</p>
+                                <p id="totalMembers" class="text-3xl font-bold text-white mt-2">--</p>
+                            </div>
+                            <div class="p-4 bg-gray-800 rounded-lg shadow-inner text-center">
+                                <p class="text-sm text-gray-400">Messages Sent (24h)</p>
+                                <p id="messages24h" class="text-3xl font-bold text-white mt-2">--</p>
+                            </div>
+                            <div class="p-4 bg-gray-800 rounded-lg shadow-inner text-center">
+                                <p class="text-sm text-gray-400">New Members (7d)</p>
+                                <p id="newMembers7d" class="text-3xl font-bold text-white mt-2">--</p>
+                            </div>
+                        </div>
+
+                        <h4 class="text-lg font-semibold text-white mb-4">Member Growth Over Time</h4>
+                        <div class="chart-container glass-container p-4">
+                            <canvas id="memberGrowthChart"></canvas>
+                        </div>
+
+                        <h4 class="text-lg font-semibold text-white mb-4 mt-8">Message Activity (Last 7 Days)</h4>
+                        <div class="chart-container glass-container p-4">
+                            <canvas id="messageActivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Audit Log Viewer Section -->
+                    <div id="audit-log-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-history mr-3 text-xl accent-color"></i> Audit Log Viewer</h3>
+                        <p class="text-gray-400 mb-6">Review recent actions taken on your server by users and bots.</p>
+
+                        <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                            <input type="text" id="auditLogSearch" class="input-field flex-1" placeholder="Search by user, action, or keyword...">
+                            <select id="auditLogFilterType" class="input-field w-full sm:w-auto">
+                                <option value="">All Types</option>
+                                <option value="MEMBER_KICK">Member Kick</option>
+                                <option value="MEMBER_BAN_ADD">Member Ban</option>
+                                <option value="CHANNEL_CREATE">Channel Create</option>
+                                <option value="ROLE_UPDATE">Role Update</option>
+                                <option value="MESSAGE_DELETE">Message Delete</option>
+                                <!-- Add more types as needed -->
+                            </select>
+                            <button id="refreshAuditLog" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Refresh</button>
+                        </div>
+
+                        <div id="auditLogList" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                            <!-- Audit log entries will be populated here -->
+                            <p class="text-gray-400 text-center py-4">Loading audit log entries...</p>
+                        </div>
+                        <p id="auditLogStatus" class="status-message text-sm mt-3"></p>
+                    </div>
+
+                    <!-- Advanced Settings Card -->
+                    <div id="advanced-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-sliders-h mr-3 text-xl accent-color"></i> Advanced Settings</h3>
+                        <div class="mb-5">
+                            <label for="commandCooldown" class="block text-gray-400 text-sm font-bold mb-2">Global Command Cooldown (seconds)</label>
                             <input type="number" id="commandCooldown" class="input-field" min="0" value="3" placeholder="e.g., 3">
+                            <p class="text-xs text-gray-500 mt-1">Minimum time between bot command uses by the same user.</p>
                         </div>
-                        <div class="mb-4">
-                            <label for="enableAI" class="block text-gray-400 text-sm font-bold mb-2">Enable AI Responses?</label>
-                            <input type="checkbox" id="enableAI" class="form-checkbox h-5 w-5 text-accent rounded">
+                        <div class="flex items-center mb-5">
+                            <input type="checkbox" id="enableAI" class="form-checkbox h-5 w-5 text-accent rounded mr-2">
+                            <label for="enableAI" class="text-gray-400 text-sm">Enable AI Responses (Experimental)?</label>
                         </div>
-                        <button id="saveAdvancedSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Save Advanced Settings</button>
-                        <p id="advancedStatus" class="status-message text-sm mt-2"></p>
+                        <div class="mb-5">
+                            <label for="adminRoleId" class="block text-gray-400 text-sm font-bold mb-2">Bot Admin Role ID</label>
+                            <input type="text" id="adminRoleId" class="input-field" placeholder="e.g., 123456789012345678">
+                            <p class="text-xs text-gray-500 mt-1">Users with this role can bypass certain bot permissions.</p>
+                        </div>
+                        <button id="saveAdvancedSettings" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg">Save Advanced Settings</button>
+                        <p id="advancedStatus" class="status-message text-sm mt-3"></p>
                     </div>
 
                     <!-- Announcement Builder Card -->
-                    <div class="card">
-                        <h3 class="text-lg font-semibold mb-4 text-white">Announcement Builder (Embed)</h3>
-                        <div class="mb-4">
-                            <label for="announcementChannelId" class="block text-gray-400 text-sm font-bold mb-2">Target Channel ID</label>
-                            <input type="text" id="announcementChannelId" class="input-field" placeholder="e.g., 123456789012345678">
+                    <div id="announcement-settings" class="card settings-section hidden">
+                        <h3 class="text-xl font-semibold mb-5 text-white flex items-center"><i class="fas fa-bullhorn mr-3 text-xl accent-color"></i> Announcement Builder (Embed)</h3>
+                        <p class="text-gray-400 mb-6">Create and send rich embed announcements to any channel.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="mb-4">
+                                    <label for="announcementChannelId" class="block text-gray-400 text-sm font-bold mb-2">Target Channel ID</label>
+                                    <input type="text" id="announcementChannelId" class="input-field" placeholder="e.g., 123456789012345678">
+                                    <p class="text-xs text-gray-500 mt-1">The channel where this announcement will be sent.</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="announcementEmbedTitle" class="block text-gray-400 text-sm font-bold mb-2">Embed Title</label>
+                                    <input type="text" id="announcementEmbedTitle" class="input-field" placeholder="e.g., Important Update!">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="announcementEmbedDescription" class="block text-gray-400 text-sm font-bold mb-2">Embed Description</label>
+                                    <textarea id="announcementEmbedDescription" class="input-field h-28 resize-y" placeholder="Details about the announcement..."></textarea>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="announcementEmbedColor" class="block text-gray-400 text-sm font-bold mb-2">Embed Color (Hex Code)</label>
+                                    <input type="text" id="announcementEmbedColor" class="input-field" value="#5F9EA0" placeholder="e.g., #5F9EA0">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="announcementEmbedFooter" class="block text-gray-400 text-sm font-bold mb-2">Embed Footer Text:</label>
+                                    <input type="text" id="announcementEmbedFooter" class="input-field" placeholder="ZeroPoint Bot Announcement">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="announcementEmbedThumbnail" class="block text-gray-400 text-sm font-bold mb-2">Embed Thumbnail URL:</label>
+                                    <input type="text" id="announcementEmbedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium text-white mb-3">Embed Preview</h4>
+                                <div id="announcement-embed-preview" class="embed-preview" style="--embed-color: #5F9EA0;">
+                                    <div class="embed-title" id="preview-announcement-embed-title">Important Update!</div>
+                                    <div class="embed-description" id="preview-announcement-embed-description">Details about the announcement...</div>
+                                    <div class="embed-footer" id="preview-announcement-embed-footer">ZeroPoint Bot Announcement</div>
+                                    <img id="preview-announcement-embed-thumbnail" src="" alt="Thumbnail Preview" class="mt-2 hidden w-16 h-16 object-cover rounded-md">
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-4">
-                            <label for="announcementEmbedTitle" class="block text-gray-400 text-sm font-bold mb-2">Embed Title</label>
-                            <input type="text" id="announcementEmbedTitle" class="input-field" placeholder="e.g., Important Update!">
-                        </div>
-                        <div class="mb-4">
-                            <label for="announcementEmbedDescription" class="block text-gray-400 text-sm font-bold mb-2">Embed Description</label>
-                            <textarea id="announcementEmbedDescription" class="input-field h-24 resize-y" placeholder="Details about the announcement..."></textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label for="announcementEmbedColor" class="block text-gray-400 text-sm font-bold mb-2">Embed Color (Hex Code)</label>
-                            <input type="text" id="announcementEmbedColor" class="input-field" value="#5F9EA0" placeholder="e.g., #5F9EA0">
-                        </div>
-                        <div class="mb-4">
-                            <label for="announcementEmbedFooter" class="block text-gray-400 text-sm font-bold mb-2">Embed Footer Text:</label>
-                            <input type="text" id="announcementEmbedFooter" class="input-field" placeholder="ZeroPoint Bot Announcement">
-                        </div>
-                        <div class="mb-4">
-                            <label for="announcementEmbedThumbnail" class="block text-gray-400 text-sm font-bold mb-2">Embed Thumbnail URL:</label>
-                            <input type="text" id="announcementEmbedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
-                        </div>
-                        <button id="sendAnnouncementBtn" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Send Announcement</button>
-                        <p id="announcementStatus" class="status-message text-sm mt-2"></p>
+                        <button id="sendAnnouncementBtn" class="save-button accent-bg text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all shadow-lg mt-6">Send Announcement</button>
+                        <p id="announcementStatus" class="status-message text-sm mt-3"></p>
                     </div>
-
                 </div>
-            </div>
-            <div id="noGuildSelected" class="text-center text-gray-400 mt-12">
-                <p class="text-lg">Please select a server from the left sidebar to manage its settings.</p>
-                <p class="text-sm mt-2">Only servers where the ZeroPoint Bot is present will be listed.</p>
             </div>
         </section>
     </main>
 
-    <footer class="w-full bg-[#1A1A1A] p-4 text-center text-gray-500 text-sm mt-auto z-10">
+    <!-- Footer Section -->
+    <footer class="w-full bg-[#1A1A1A] p-4 text-center text-gray-500 text-sm mt-auto z-10 rounded-t-lg">
         &copy; <span id="current-year"></span> ZeroPoint. All rights reserved.
     </footer>
 
+    <!-- Custom Modal for Alerts/Confirmations (replaces alert() and confirm()) -->
+    <div id="customModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-bold text-white mb-4"></h3>
+            <p id="modalMessage" class="text-gray-300 mb-6"></p>
+            <div class="modal-buttons">
+                <button id="modalCancelBtn" class="modal-button cancel">Cancel</button>
+                <button id="modalConfirmBtn" class="modal-button confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Define base URL for API calls (simulated)
         const BASE_URL = window.location.origin;
-        let userGuilds = [];
-        let botGuilds = [];
-        let selectedGuildId = null;
 
-        // DOM Elements - Declared here, assigned inside DOMContentLoaded
-        let usernameSpan, guildListElement, guildsHeader, selectedGuildNameSpan, settingsContentDiv, noGuildSelectedDiv;
-        let navGeneral, navVerification;
-        let generalSettingsSection, verificationSettingsSection;
-        let botPrefixInput, defaultRoleInput, welcomeChannelInput, farewellChannelInput, welcomeMessageInput, welcomeDMCheckbox;
-        let logChannelInput, logMessagesCheckbox, logChannelsCheckbox;
-        let ticketCategoryInput, ticketRoleInput;
-        let commandCooldownInput, enableAICheckbox;
-        let announcementChannelIdInput, announcementEmbedTitleInput, announcementEmbedDescriptionInput, announcementEmbedColorInput, announcementEmbedFooterInput, announcementEmbedThumbnailInput;
+        // Global variables for dashboard state
+        let userGuilds = []; // Stores guilds the user is a member of
+        let botGuilds = [];  // Stores guilds the bot is present in
+        let selectedGuildId = null; // Currently selected guild ID
+        let selectedGuildName = ''; // Currently selected guild name
 
-        // Verification settings elements
-        let verificationChannelIdInput, unverifiedRoleIdInput, verifiedRoleIdInput, verificationMessageContentInput;
-        let verificationEmbedTitleInput, verificationEmbedDescriptionInput, verificationEmbedColorInput, verificationEmbedFooterInput, verificationEmbedThumbnailInput;
-        
-        // Embed preview elements for Verification
+        // Chart instances
+        let memberGrowthChartInstance = null;
+        let messageActivityChartInstance = null;
+
+        // --- DOM Element References (assigned on DOMContentLoaded) ---
+        let usernameSpan, guildListElement, guildsHeader, selectedGuildNameSpanElement, settingsContentDiv, noGuildSelectedDiv;
+
+        // Navigation elements
+        let navGeneral, navWelcome, navLogging, navTicket, navVerification, navCustomCommands, navReactionRoles, navLeveling, navMusic, navIntegrations, navAnalytics, navAuditLog, navAdvanced, navAnnouncement;
+
+        // Section containers
+        let generalSettingsSection, welcomeSettingsSection, loggingSettingsSection, ticketSettingsSection, verificationSettingsSection, customCommandsSettingsSection, reactionRolesSettingsSection, levelingSettingsSection, musicSettingsSection, integrationsSettingsSection, analyticsSettingsSection, auditLogSettingsSection, advancedSettingsSection, announcementSettingsSection;
+
+        // Input fields for various settings
+        let botPrefixInput, defaultRoleInput; // General
+        let welcomeChannelInput, welcomeMessageInput, welcomeDMCheckbox, farewellChannelInput, farewellMessageInput; // Welcome & Farewell
+        let logChannelInput, logMessagesCheckbox, logChannelsCheckbox, logMembersCheckbox; // Logging
+        let ticketCategoryInput, ticketRoleInput, ticketMessageInput; // Ticket
+        let verificationChannelIdInput, unverifiedRoleIdInput, verifiedRoleIdInput, verificationMessageContentInput; // Verification
+        let verificationEmbedTitleInput, verificationEmbedDescriptionInput, verificationEmbedColorInput, verificationEmbedFooterInput, verificationEmbedThumbnailInput; // Verification Embed
+        let newCommandNameInput, newCommandResponseInput, newCommandTypeInput, newCommandEmbedFieldsDiv, newCommandEmbedTitleInput, newCommandEmbedDescriptionInput, newCommandEmbedColorInput; // Custom Commands
+        let reactionRoleChannelIdInput, reactionRoleMessageContentInput, reactionRoleEmojiInput, reactionRoleRoleIdInput; // Reaction Roles
+        let xpPerMessageInput, xpCooldownInput, levelUpMessageInput, levelUpChannelInput, rewardLevelInput, rewardRoleIdInput; // Leveling
+        let musicChannelInput, djRoleIdInput, allowAnyoneQueueCheckbox; // Music
+        let webhookUrlInput, webhookChannelIdInput; // Integrations
+        let commandCooldownInput, enableAICheckbox, adminRoleIdInput; // Advanced
+        let announcementChannelIdInput, announcementEmbedTitleInput, announcementEmbedDescriptionInput, announcementEmbedColorInput, announcementEmbedFooterInput, announcementEmbedThumbnailInput; // Announcement
+
+        // Embed preview elements
         let verificationEmbedPreview, previewVerificationEmbedTitle, previewVerificationEmbedDescription, previewVerificationEmbedFooter, previewVerificationEmbedThumbnail;
-        // Embed preview elements for Announcement
         let announcementEmbedPreview, previewAnnouncementEmbedTitle, previewAnnouncementEmbedDescription, previewAnnouncementEmbedFooter, previewAnnouncementEmbedThumbnail;
 
+        // Save/Action buttons
+        let saveGeneralSettingsBtn, saveWelcomeSettingsBtn, saveLoggingSettingsBtn, saveTicketSettingsBtn, saveVerificationSettingsBtn, addCustomCommandBtn, addReactionRoleBtn, addLevelRewardBtn, saveMusicSettingsBtn, saveIntegrationsSettingsBtn, saveLevelingSettingsBtn, saveAdvancedSettingsBtn, sendAnnouncementBtn;
 
-        // Save buttons and status messages
-        let saveGeneralSettingsBtn, generalStatusMsg;
-        let saveWelcomeSettingsBtn, welcomeStatusMsg;
-        let saveLoggingSettingsBtn, loggingStatusMsg;
-        let saveTicketSettingsBtn, ticketStatusMsg;
-        let saveAdvancedSettingsBtn, advancedStatusMsg;
-        let sendAnnouncementBtn, announcementStatusMsg;
-        let saveVerificationSettingsBtn, verificationStatusMsg;
+        // Status message elements
+        let generalStatusMsg, welcomeStatusMsg, loggingStatusMsg, ticketStatusMsg, verificationStatusMsg, customCommandStatusMsg, reactionRoleStatusMsg, levelingStatusMsg, musicStatusMsg, integrationsStatusMsg, advancedStatusMsg, announcementStatusMsg, auditLogStatusMsg;
 
+        // Analytics elements
+        let totalMembersSpan, messages24hSpan, newMembers7dSpan;
+        let memberGrowthChartCanvas, messageActivityChartCanvas;
 
+        // Audit Log elements
+        let auditLogSearchInput, auditLogFilterTypeSelect, refreshAuditLogBtn, auditLogListDiv;
+
+        // Modal elements
+        let customModalOverlay, modalTitle, modalMessage, modalCancelBtn, modalConfirmBtn;
+
+        /**
+         * Initializes the dashboard when the DOM is fully loaded.
+         * Assigns DOM elements, fetches initial data, renders guild list, and sets up event listeners.
+         */
         document.addEventListener('DOMContentLoaded', async () => {
-            // Assign DOM Elements inside DOMContentLoaded
+            // --- Assign DOM Elements ---
             usernameSpan = document.getElementById('username');
             guildListElement = document.getElementById('guildList');
             guildsHeader = document.getElementById('guildsHeader');
-            selectedGuildNameSpan = document.getElementById('selectedGuildName');
+            selectedGuildNameSpanElement = document.getElementById('selectedGuildName');
             settingsContentDiv = document.getElementById('settingsContent');
             noGuildSelectedDiv = document.getElementById('noGuildSelected');
 
+            // Navigation elements
             navGeneral = document.getElementById('nav-general');
+            navWelcome = document.getElementById('nav-welcome');
+            navLogging = document.getElementById('nav-logging');
+            navTicket = document.getElementById('nav-ticket');
             navVerification = document.getElementById('nav-verification');
+            navCustomCommands = document.getElementById('nav-custom-commands');
+            navReactionRoles = document.getElementById('nav-reaction-roles');
+            navLeveling = document.getElementById('nav-leveling');
+            navMusic = document.getElementById('nav-music');
+            navIntegrations = document.getElementById('nav-integrations');
+            navAnalytics = document.getElementById('nav-analytics');
+            navAuditLog = document.getElementById('nav-audit-log');
+            navAdvanced = document.getElementById('nav-advanced');
+            navAnnouncement = document.getElementById('nav-announcement');
 
+            // Section containers
             generalSettingsSection = document.getElementById('general-settings');
+            welcomeSettingsSection = document.getElementById('welcome-settings');
+            loggingSettingsSection = document.getElementById('logging-settings');
+            ticketSettingsSection = document.getElementById('ticket-settings');
             verificationSettingsSection = document.getElementById('verification-settings');
+            customCommandsSettingsSection = document.getElementById('custom-commands-settings');
+            reactionRolesSettingsSection = document.getElementById('reaction-roles-settings');
+            levelingSettingsSection = document.getElementById('leveling-settings');
+            musicSettingsSection = document.getElementById('music-settings');
+            integrationsSettingsSection = document.getElementById('integrations-settings');
+            analyticsSettingsSection = document.getElementById('analytics-settings');
+            auditLogSettingsSection = document.getElementById('audit-log-settings');
+            advancedSettingsSection = document.getElementById('advanced-settings');
+            announcementSettingsSection = document.getElementById('announcement-settings');
 
+            // Input fields
             botPrefixInput = document.getElementById('botPrefix');
             defaultRoleInput = document.getElementById('defaultRole');
             welcomeChannelInput = document.getElementById('welcomeChannel');
-            farewellChannelInput = document.getElementById('farewell-channel-id');
             welcomeMessageInput = document.getElementById('welcomeMessage');
             welcomeDMCheckbox = document.getElementById('welcomeDM');
+            farewellChannelInput = document.getElementById('farewellChannel');
+            farewellMessageInput = document.getElementById('farewellMessage');
             logChannelInput = document.getElementById('logChannel');
             logMessagesCheckbox = document.getElementById('logMessages');
             logChannelsCheckbox = document.getElementById('logChannels');
+            logMembersCheckbox = document.getElementById('logMembers');
             ticketCategoryInput = document.getElementById('ticketCategory');
             ticketRoleInput = document.getElementById('ticketRole');
-            commandCooldownInput = document.getElementById('commandCooldown');
-            enableAICheckbox = document.getElementById('enableAI');
-            announcementChannelIdInput = document.getElementById('announcementChannelId');
-            announcementEmbedTitleInput = document.getElementById('announcementEmbedTitle'); // Corrected ID
-            announcementEmbedDescriptionInput = document.getElementById('announcementEmbedDescription'); // Corrected ID
-            announcementEmbedColorInput = document.getElementById('announcementEmbedColor'); // Corrected ID
-            announcementEmbedFooterInput = document.getElementById('announcementEmbedFooter'); // Corrected ID
-            announcementEmbedThumbnailInput = document.getElementById('announcementEmbedThumbnail'); // Corrected ID
-
+            ticketMessageInput = document.getElementById('ticketMessage');
             verificationChannelIdInput = document.getElementById('verificationChannelId');
             unverifiedRoleIdInput = document.getElementById('unverifiedRoleId');
             verifiedRoleIdInput = document.getElementById('verifiedRoleId');
@@ -611,112 +1077,313 @@
             verificationEmbedColorInput = document.getElementById('verificationEmbedColor');
             verificationEmbedFooterInput = document.getElementById('verificationEmbedFooter');
             verificationEmbedThumbnailInput = document.getElementById('verificationEmbedThumbnail');
-            
+            newCommandNameInput = document.getElementById('newCommandName');
+            newCommandResponseInput = document.getElementById('newCommandResponse');
+            newCommandTypeInput = document.getElementById('newCommandType');
+            newCommandEmbedFieldsDiv = document.getElementById('newCommandEmbedFields');
+            newCommandEmbedTitleInput = document.getElementById('newCommandEmbedTitle');
+            newCommandEmbedDescriptionInput = document.getElementById('newCommandEmbedDescription');
+            newCommandEmbedColorInput = document.getElementById('newCommandEmbedColor');
+            reactionRoleChannelIdInput = document.getElementById('reactionRoleChannelId');
+            reactionRoleMessageContentInput = document.getElementById('reactionRoleMessageContent');
+            reactionRoleEmojiInput = document.getElementById('reactionRoleEmoji');
+            reactionRoleRoleIdInput = document.getElementById('reactionRoleRoleId');
+            xpPerMessageInput = document.getElementById('xpPerMessage');
+            xpCooldownInput = document.getElementById('xpCooldown');
+            levelUpMessageInput = document.getElementById('levelUpMessage');
+            levelUpChannelInput = document.getElementById('levelUpChannel');
+            rewardLevelInput = document.getElementById('rewardLevel');
+            rewardRoleIdInput = document.getElementById('rewardRoleId');
+            musicChannelInput = document.getElementById('musicChannel');
+            djRoleIdInput = document.getElementById('djRoleId');
+            allowAnyoneQueueCheckbox = document.getElementById('allowAnyoneQueue');
+            webhookUrlInput = document.getElementById('webhookUrl');
+            webhookChannelIdInput = document.getElementById('webhookChannelId');
+            commandCooldownInput = document.getElementById('commandCooldown');
+            enableAICheckbox = document.getElementById('enableAI');
+            adminRoleIdInput = document.getElementById('adminRoleId');
+            announcementChannelIdInput = document.getElementById('announcementChannelId');
+            announcementEmbedTitleInput = document.getElementById('announcementEmbedTitle');
+            announcementEmbedDescriptionInput = document.getElementById('announcementEmbedDescription');
+            announcementEmbedColorInput = document.getElementById('announcementEmbedColor');
+            announcementEmbedFooterInput = document.getElementById('announcementEmbedFooter');
+            announcementEmbedThumbnailInput = document.getElementById('announcementEmbedThumbnail');
+
+            // Embed preview elements
             verificationEmbedPreview = document.getElementById('verification-embed-preview');
             previewVerificationEmbedTitle = document.getElementById('preview-verification-embed-title');
             previewVerificationEmbedDescription = document.getElementById('preview-verification-embed-description');
             previewVerificationEmbedFooter = document.getElementById('preview-verification-embed-footer');
             previewVerificationEmbedThumbnail = document.getElementById('preview-verification-embed-thumbnail');
+            announcementEmbedPreview = document.getElementById('announcement-embed-preview');
+            previewAnnouncementEmbedTitle = document.getElementById('preview-announcement-embed-title');
+            previewAnnouncementEmbedDescription = document.getElementById('preview-announcement-embed-description');
+            previewAnnouncementEmbedFooter = document.getElementById('preview-announcement-embed-footer');
+            previewAnnouncementEmbedThumbnail = document.getElementById('preview-announcement-embed-thumbnail');
 
-            announcementEmbedPreview = document.getElementById('announcement-embed-preview'); // New ID for announcement preview
-            previewAnnouncementEmbedTitle = document.getElementById('preview-announcement-embed-title'); // New ID
-            previewAnnouncementEmbedDescription = document.getElementById('preview-announcement-embed-description'); // New ID
-            previewAnnouncementEmbedFooter = document.getElementById('preview-announcement-embed-footer'); // New ID
-            previewAnnouncementEmbedThumbnail = document.getElementById('preview-announcement-embed-thumbnail'); // New ID
-
-
+            // Buttons
             saveGeneralSettingsBtn = document.getElementById('saveGeneralSettings');
-            generalStatusMsg = document.getElementById('generalStatus');
             saveWelcomeSettingsBtn = document.getElementById('saveWelcomeSettings');
-            welcomeStatusMsg = document.getElementById('welcomeStatus');
             saveLoggingSettingsBtn = document.getElementById('saveLoggingSettings');
-            loggingStatusMsg = document.getElementById('loggingStatus');
             saveTicketSettingsBtn = document.getElementById('saveTicketSettings');
-            ticketStatusMsg = document.getElementById('ticketStatus');
-            saveAdvancedSettingsBtn = document.getElementById('saveAdvancedSettings');
-            advancedStatusMsg = document.getElementById('advancedStatus');
-            sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
-            announcementStatusMsg = document.getElementById('announcementStatus');
             saveVerificationSettingsBtn = document.getElementById('saveVerificationSettings');
+            addCustomCommandBtn = document.getElementById('addCustomCommand');
+            addReactionRoleBtn = document.getElementById('addReactionRole');
+            addLevelRewardBtn = document.getElementById('addLevelReward');
+            saveMusicSettingsBtn = document.getElementById('saveMusicSettings');
+            saveIntegrationsSettingsBtn = document.getElementById('saveIntegrationsSettings');
+            saveLevelingSettingsBtn = document.getElementById('saveLevelingSettings');
+            saveAdvancedSettingsBtn = document.getElementById('saveAdvancedSettings');
+            sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
+            refreshAuditLogBtn = document.getElementById('refreshAuditLog');
+
+            // Status messages
+            generalStatusMsg = document.getElementById('generalStatus');
+            welcomeStatusMsg = document.getElementById('welcomeStatus');
+            loggingStatusMsg = document.getElementById('loggingStatus');
+            ticketStatusMsg = document.getElementById('ticketStatus');
             verificationStatusMsg = document.getElementById('verificationStatus');
+            customCommandStatusMsg = document.getElementById('customCommandStatus');
+            reactionRoleStatusMsg = document.getElementById('reactionRoleStatus');
+            levelingStatusMsg = document.getElementById('levelingStatus');
+            musicStatusMsg = document.getElementById('musicStatus');
+            integrationsStatusMsg = document.getElementById('integrationsStatus');
+            advancedStatusMsg = document.getElementById('advancedStatus');
+            announcementStatusMsg = document.getElementById('announcementStatus');
+            auditLogStatusMsg = document.getElementById('auditLogStatus');
 
+            // Analytics elements
+            totalMembersSpan = document.getElementById('totalMembers');
+            messages24hSpan = document.getElementById('messages24h');
+            newMembers7dSpan = document.getElementById('newMembers7d');
+            memberGrowthChartCanvas = document.getElementById('memberGrowthChart');
+            messageActivityChartCanvas = document.getElementById('messageActivityChart');
 
+            // Audit Log elements
+            auditLogSearchInput = document.getElementById('auditLogSearch');
+            auditLogFilterTypeSelect = document.getElementById('auditLogFilterType');
+            auditLogListDiv = document.getElementById('auditLogList');
+
+            // Modal elements
+            customModalOverlay = document.getElementById('customModalOverlay');
+            modalTitle = document.getElementById('modalTitle');
+            modalMessage = document.getElementById('modalMessage');
+            modalCancelBtn = document.getElementById('modalCancelBtn');
+            modalConfirmBtn = document.getElementById('modalConfirmBtn');
+
+            // Set current year in footer
             document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // --- Initial Data Fetch & Render ---
             await fetchUserData();
             await fetchBotGuilds();
             renderGuildList();
 
-            // Add event listeners for save buttons
+            // --- Event Listeners ---
+            // Navigation clicks
+            navGeneral.addEventListener('click', (e) => { e.preventDefault(); showSection('general-settings'); });
+            navWelcome.addEventListener('click', (e) => { e.preventDefault(); showSection('welcome-settings'); });
+            navLogging.addEventListener('click', (e) => { e.preventDefault(); showSection('logging-settings'); });
+            navTicket.addEventListener('click', (e) => { e.preventDefault(); showSection('ticket-settings'); });
+            navVerification.addEventListener('click', (e) => { e.preventDefault(); showSection('verification-settings'); });
+            navCustomCommands.addEventListener('click', (e) => { e.preventDefault(); showSection('custom-commands-settings'); });
+            navReactionRoles.addEventListener('click', (e) => { e.preventDefault(); showSection('reaction-roles-settings'); });
+            navLeveling.addEventListener('click', (e) => { e.preventDefault(); showSection('leveling-settings'); });
+            navMusic.addEventListener('click', (e) => { e.preventDefault(); showSection('music-settings'); });
+            navIntegrations.addEventListener('click', (e) => { e.preventDefault(); showSection('integrations-settings'); });
+            navAnalytics.addEventListener('click', (e) => { e.preventDefault(); showSection('analytics-settings'); });
+            navAuditLog.addEventListener('click', (e) => { e.preventDefault(); showSection('audit-log-settings'); });
+            navAdvanced.addEventListener('click', (e) => { e.preventDefault(); showSection('advanced-settings'); });
+            navAnnouncement.addEventListener('click', (e) => { e.preventDefault(); showSection('announcement-settings'); });
+
+            // Save buttons
             saveGeneralSettingsBtn.addEventListener('click', () => saveSettings('general'));
             saveWelcomeSettingsBtn.addEventListener('click', () => saveSettings('welcome'));
             saveLoggingSettingsBtn.addEventListener('click', () => saveSettings('logging'));
             saveTicketSettingsBtn.addEventListener('click', () => saveSettings('ticket'));
-            saveAdvancedSettingsBtn.addEventListener('click', () => saveSettings('advanced'));
             saveVerificationSettingsBtn.addEventListener('click', () => saveSettings('verification'));
-            sendAnnouncementBtn.addEventListener('click', sendAnnouncement);
+            saveAdvancedSettingsBtn.addEventListener('click', () => saveSettings('advanced'));
+            saveMusicSettingsBtn.addEventListener('click', () => saveSettings('music'));
+            saveIntegrationsSettingsBtn.addEventListener('click', () => saveSettings('integrations'));
+            saveLevelingSettingsBtn.addEventListener('click', () => saveSettings('leveling'));
 
-            // Add event listeners for verification embed preview
+            // Specific action buttons
+            addCustomCommandBtn.addEventListener('click', addCustomCommand);
+            addReactionRoleBtn.addEventListener('click', addReactionRole);
+            addLevelRewardBtn.addEventListener('click', addLevelReward);
+            sendAnnouncementBtn.addEventListener('click', sendAnnouncement);
+            refreshAuditLogBtn.addEventListener('click', () => loadAuditLog(selectedGuildId));
+
+            // Embed preview updates
             verificationEmbedTitleInput.addEventListener('input', updateVerificationEmbedPreview);
             verificationEmbedDescriptionInput.addEventListener('input', updateVerificationEmbedPreview);
             verificationEmbedColorInput.addEventListener('input', updateVerificationEmbedPreview);
             verificationEmbedFooterInput.addEventListener('input', updateVerificationEmbedPreview);
             verificationEmbedThumbnailInput.addEventListener('input', updateVerificationEmbedPreview);
 
-            // Add event listeners for announcement embed preview
             announcementEmbedTitleInput.addEventListener('input', updateAnnouncementEmbedPreview);
             announcementEmbedDescriptionInput.addEventListener('input', updateAnnouncementEmbedPreview);
             announcementEmbedColorInput.addEventListener('input', updateAnnouncementEmbedPreview);
             announcementEmbedFooterInput.addEventListener('input', updateAnnouncementEmbedPreview);
             announcementEmbedThumbnailInput.addEventListener('input', updateAnnouncementEmbedPreview);
 
-            // Initial section display
-            showSection('general-settings');
+            // Custom command type change listener
+            newCommandTypeInput.addEventListener('change', () => {
+                if (newCommandTypeInput.value === 'embed') {
+                    newCommandEmbedFieldsDiv.classList.remove('hidden');
+                } else {
+                    newCommandEmbedFieldsDiv.classList.add('hidden');
+                }
+            });
+
+            // Audit log search/filter
+            auditLogSearchInput.addEventListener('input', () => filterAuditLog());
+            auditLogFilterTypeSelect.addEventListener('change', () => filterAuditLog());
         });
 
-        // Show a temporary message to the user
+        /**
+         * Displays a temporary, non-blocking message notification.
+         * @param {string} message - The message to display.
+         * @param {'success'|'error'} type - The type of message (determines color).
+         */
         function showMessage(message, type = 'success') {
             const messageDiv = document.createElement('div');
             messageDiv.textContent = message;
-            messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 transition-all transform ease-out duration-300 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} translate-x-full opacity-0`;
             document.body.appendChild(messageDiv);
+
+            // Animate in
             setTimeout(() => {
-                messageDiv.remove();
+                messageDiv.classList.remove('translate-x-full', 'opacity-0');
+                messageDiv.classList.add('translate-x-0', 'opacity-100');
+            }, 10); // Small delay to ensure transition applies
+
+            // Animate out and remove
+            setTimeout(() => {
+                messageDiv.classList.remove('translate-x-0', 'opacity-100');
+                messageDiv.classList.add('translate-x-full', 'opacity-0');
+                messageDiv.addEventListener('transitionend', () => messageDiv.remove());
             }, 3000);
         }
 
+        /**
+         * Shows a custom modal dialog for confirmations or alerts.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message content of the modal.
+         * @param {boolean} isConfirm - If true, shows a "Cancel" button.
+         * @returns {Promise<boolean>} Resolves true if confirmed, false if cancelled.
+         */
+        function showCustomModal(title, message, isConfirm = false) {
+            return new Promise(resolve => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+
+                if (isConfirm) {
+                    modalCancelBtn.classList.remove('hidden');
+                } else {
+                    modalCancelBtn.classList.add('hidden');
+                }
+
+                // Clear previous listeners
+                const cloneConfirm = modalConfirmBtn.cloneNode(true);
+                modalConfirmBtn.parentNode.replaceChild(cloneConfirm, modalConfirmBtn);
+                modalConfirmBtn = cloneConfirm;
+
+                const cloneCancel = modalCancelBtn.cloneNode(true);
+                modalCancelBtn.parentNode.replaceChild(cloneCancel, modalCancelBtn);
+                modalCancelBtn = cloneCancel;
+
+                // Add new listeners
+                modalConfirmBtn.addEventListener('click', () => {
+                    customModalOverlay.classList.remove('show');
+                    resolve(true);
+                });
+                modalCancelBtn.addEventListener('click', () => {
+                    customModalOverlay.classList.remove('show');
+                    resolve(false);
+                });
+
+                customModalOverlay.classList.add('show');
+            });
+        }
+
+        /**
+         * Simulates fetching user data from a backend.
+         * In a real app, this would involve an authenticated API call.
+         */
         async function fetchUserData() {
             try {
-                const response = await fetch(BASE_URL + '/user');
-                if (!response.ok) {
-                    // Show error message on UI
-                    showMessage('Failed to load user data. You might need to log in again.', 'error');
-                    throw new Error('Not authenticated or API error: ' + response.statusText);
+                // Simulate network request delay
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Dummy user data
+                const dummyUserData = {
+                    username: 'DashboardUser',
+                    discriminator: '0001',
+                    guilds: [
+                        { id: '101', name: 'My Awesome Server', icon: 'a_1' },
+                        { id: '102', name: 'Dev Community', icon: null },
+                        { id: '103', name: 'Gaming Hub', icon: 'a_2' },
+                        { id: '104', name: 'Testing Ground', icon: null },
+                        { id: '105', name: 'Another Server', icon: 'a_3' },
+                        { id: '106', name: 'Bot Testing Area', icon: null },
+                        { id: '107', name: 'Private Zone', icon: 'a_4' },
+                        { id: '108', name: 'Public Hangout', icon: null },
+                        { id: '109', name: 'Creative Space', icon: 'a_5' },
+                        { id: '110', name: 'Study Group', icon: null },
+                    ]
+                };
+
+                // Try to load user data from localStorage if available
+                const storedUserData = localStorage.getItem('zeroPointUserData');
+                if (storedUserData) {
+                    userGuilds = JSON.parse(storedUserData).guilds;
+                    usernameSpan.textContent = JSON.parse(storedUserData).username + '#' + JSON.parse(storedUserData).discriminator;
+                } else {
+                    userGuilds = dummyUserData.guilds;
+                    usernameSpan.textContent = dummyUserData.username + '#' + dummyUserData.discriminator;
+                    localStorage.setItem('zeroPointUserData', JSON.stringify(dummyUserData)); // Save dummy data
                 }
-                const data = await response.json();
-                usernameSpan.textContent = data.username + '#' + data.discriminator;
-                userGuilds = data.guilds || [];
             } catch (error) {
                 console.error('Error fetching user data:', error);
-                window.location.href = BASE_URL + '/'; // Redirect to login on error
+                showMessage('Failed to load user data. Please try logging in again.', 'error');
+                // In a real app, you'd redirect to login: window.location.href = BASE_URL + '/login';
             }
         }
 
+        /**
+         * Simulates fetching guilds where the bot is present.
+         * In a real app, this would be an API call to your bot's backend.
+         */
         async function fetchBotGuilds() {
             try {
-                const response = await fetch(BASE_URL + '/bot-guilds');
-                if (!response.ok) {
-                    // Show error message on UI
-                    showMessage('Failed to load server list. Please ensure the bot is running and authenticated.', 'error');
-                    throw new Error('Failed to fetch bot guilds: ' + response.statusText);
-                }
-                botGuilds = await response.json();
+                // Simulate network request delay
+                await new Promise(resolve => setTimeout(resolve, 400));
+
+                // Dummy bot guilds data (subset of user guilds)
+                const dummyBotGuilds = [
+                    { id: '101', name: 'My Awesome Server' },
+                    { id: '103', name: 'Gaming Hub' },
+                    { id: '105', name: 'Another Server' },
+                    { id: '107', name: 'Private Zone' },
+                    { id: '109', name: 'Creative Space' }
+                ];
+
+                // For demonstration, let's assume the bot is in a few of the user's guilds.
+                // In a real scenario, this would be fetched from your bot's API.
+                botGuilds = dummyBotGuilds;
+
             } catch (error) {
                 console.error('Error fetching bot guilds:', error);
-                guildListElement.innerHTML = '<li class="text-red-400">Could not load bot guilds. Please check server logs.</li>';
-                guildsHeader.classList.add('hidden'); // Hide header if bot guilds cannot be loaded
+                guildListElement.innerHTML = '<li class="text-red-400 p-3">Could not load bot servers. Please ensure the bot is online.</li>';
+                guildsHeader.classList.add('hidden');
+                showMessage('Failed to load bot server list. Check bot status.', 'error');
             }
         }
 
+        /**
+         * Renders the list of guilds in the sidebar where both the user and bot are present.
+         */
         function renderGuildList() {
             guildListElement.innerHTML = ''; // Clear existing list
 
@@ -725,16 +1392,16 @@
             );
 
             if (guildsWithBot.length === 0) {
-                guildsHeader.classList.add('hidden'); // Hide the header
-                guildListElement.innerHTML = '<li class="text-gray-400">ZeroPoint Bot is not in any of your servers.</li>';
+                guildsHeader.classList.add('hidden');
+                guildListElement.innerHTML = '<li class="text-gray-400 p-3">ZeroPoint Bot is not in any of your servers.</li>';
                 return;
             }
 
-            guildsHeader.classList.remove('hidden'); // Show the header if there are guilds with the bot
+            guildsHeader.classList.remove('hidden');
 
             guildsWithBot.forEach(guild => {
                 const listItem = document.createElement('li');
-                listItem.className = 'guild-card flex items-center p-3 rounded-md bg-[#282828] hover:bg-[#3A3A3A] transition-colors duration-200'; /* Adjusted background for consistency */
+                listItem.className = 'guild-card flex items-center p-3 rounded-md bg-[#282828] hover:bg-[#3A3A3A] transition-colors duration-200';
                 listItem.dataset.guildId = guild.id;
                 listItem.innerHTML = `
                     ${guild.icon ? `<img src="https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=32" alt="${guild.name} icon" class="w-8 h-8 rounded-full mr-3">` : `<div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold mr-3">${guild.name.charAt(0)}</div>`}
@@ -745,18 +1412,31 @@
             });
         }
 
+        /**
+         * Handles the selection of a guild from the sidebar.
+         * Loads settings for the selected guild and updates the UI.
+         * @param {string} guildId - The ID of the selected guild.
+         * @param {string} guildName - The name of the selected guild.
+         */
         async function selectGuild(guildId, guildName) {
+            // Deselect previous guild visually
             if (selectedGuildId) {
                 const prevSelected = document.querySelector(`.guild-card[data-guild-id="${selectedGuildId}"]`);
                 if (prevSelected) {
                     prevSelected.classList.remove('selected');
                 }
             }
+
+            // Set new selected guild
             selectedGuildId = guildId;
-            selectedGuildNameSpan.textContent = guildName;
+            selectedGuildName = guildName; // Update global variable
+            selectedGuildNameSpanElement.textContent = guildName;
+
+            // Update UI visibility
             noGuildSelectedDiv.classList.add('hidden');
             settingsContentDiv.classList.remove('hidden');
 
+            // Visually select the new guild
             const currentSelected = document.querySelector(`.guild-card[data-guild-id="${selectedGuildId}"]`);
             if (currentSelected) {
                 currentSelected.classList.add('selected');
@@ -770,86 +1450,118 @@
 
             // Load settings for the newly selected guild
             await loadSettings(guildId);
+
+            // Automatically show the general settings section after selecting a guild
+            showSection('general-settings');
         }
 
+        /**
+         * Loads settings for a given guild (simulated from localStorage or dummy data).
+         * @param {string} guildId - The ID of the guild to load settings for.
+         */
         async function loadSettings(guildId) {
-            // In a real application, you would fetch settings from your backend API:
-            // const response = await fetch(`${BASE_URL}/api/settings/${guildId}`);
-            // const settings = await response.json();
-            // For now, we'll simulate loading with dummy data or defaults
-
+            console.log(`Loading settings for guild: ${guildId}`);
             // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 700));
 
-            // Dummy settings data (replace with actual fetch from backend)
-            // These values would come from your database for the selected guild
-            const dummySettings = {
-                general: {
-                    botPrefix: '!',
-                    defaultRole: '' // Empty by default
-                },
-                welcome: {
-                    welcomeChannel: '',
-                    farewellChannelId: '', // Added for consistency
-                    welcomeMessage: `Welcome {user} to ${selectedGuildNameSpan.textContent}! Enjoy your stay.`,
-                    sendWelcomeDM: false
-                },
-                logging: {
-                    logChannel: '',
-                    logMessages: true,
-                    logChannels: true
-                },
-                ticket: {
-                    ticketCategory: '',
-                    ticketRole: ''
-                },
-                verification: { // NEW DUMMY DATA
-                    channelId: '',
-                    unverifiedRoleId: '',
-                    verifiedRoleId: '',
+            // Attempt to load settings from localStorage first
+            let settings = JSON.parse(localStorage.getItem(`guildSettings_${guildId}`)) || {};
+
+            // Default dummy settings if nothing is found in localStorage
+            const defaultSettings = {
+                general: { botPrefix: '!', defaultRole: '' },
+                welcome: { welcomeChannel: '', farewellChannel: '', welcomeMessage: `Welcome {user} to ${selectedGuildName}! Enjoy your stay.`, farewellMessage: `{user} has left the server.`, sendWelcomeDM: false },
+                logging: { logChannel: '', logMessages: true, logChannels: true, logMembers: true },
+                ticket: { ticketCategory: '', ticketRole: '', ticketMessage: 'Hello {user}! How can we help you today?' },
+                verification: {
+                    channelId: '', unverifiedRoleId: '', verifiedRoleId: '',
                     messageContent: 'Welcome {user}! To gain access to the server, please click the "Verify" button below.',
                     embed: {
                         title: '✅ Server Verification',
                         description: 'Please click the button below to verify your account and gain full access to the server. This helps us keep our community safe!',
-                        color: '#2cb4e9',
-                        footer: { text: 'ZeroPoint | Verification' },
-                        thumbnail: { url: 'https://melonvisuals.me/test/zeropoint.png' }
+                        color: '#2cb4e9', footer: { text: 'ZeroPoint | Verification' }, thumbnail: { url: 'https://melonvisuals.me/test/zeropoint.png' }
                     }
                 },
-                advanced: {
-                    commandCooldown: 5,
-                    enableAI: false
-                }
+                customCommands: [],
+                reactionRoles: [],
+                leveling: { xpPerMessage: 15, xpCooldown: 60, levelUpMessage: 'Congratulations {user}, you reached level {level}!', levelUpChannel: '', rewards: [] },
+                music: { musicChannel: '', djRoleId: '', allowAnyoneQueue: true },
+                integrations: { webhookUrl: '', webhookChannelId: '' },
+                advanced: { commandCooldown: 3, enableAI: false, adminRoleId: '' },
+                analytics: {
+                    totalMembers: Math.floor(Math.random() * 1000) + 100, // Random number for demo
+                    messages24h: Math.floor(Math.random() * 5000) + 500,
+                    newMembers7d: Math.floor(Math.random() * 100) + 10,
+                    memberGrowthData: Array.from({length: 7}, () => Math.floor(Math.random() * 50) + 5),
+                    messageActivityData: Array.from({length: 7}, () => Math.floor(Math.random() * 1000) + 100),
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']
+                },
+                auditLog: generateDummyAuditLog() // Generate dummy audit log entries
             };
 
-            // Populate input fields with loaded settings
-            botPrefixInput.value = dummySettings.general.botPrefix;
-            defaultRoleInput.value = dummySettings.general.defaultRole;
-            welcomeChannelInput.value = dummySettings.welcome.welcomeChannel;
-            farewellChannelInput.value = dummySettings.welcome.farewellChannelId; // Populate farewell channel
-            welcomeMessageInput.value = dummySettings.welcome.welcomeMessage;
-            welcomeDMCheckbox.checked = dummySettings.welcome.sendWelcomeDM;
-            logChannelInput.value = dummySettings.logging.logChannel;
-            logMessagesCheckbox.checked = dummySettings.logging.logMessages;
-            logChannelsCheckbox.checked = dummySettings.logging.logChannels;
-            ticketCategoryInput.value = dummySettings.ticket.ticketCategory;
-            ticketRoleInput.value = dummySettings.ticket.ticketRole;
-            commandCooldownInput.value = dummySettings.advanced.commandCooldown;
-            enableAICheckbox.checked = dummySettings.advanced.enableAI;
+            // Merge loaded settings with defaults to ensure all fields exist
+            settings = { ...defaultSettings, ...settings };
+            for (const key in defaultSettings) {
+                if (typeof defaultSettings[key] === 'object' && defaultSettings[key] !== null && !Array.isArray(defaultSettings[key])) {
+                    settings[key] = { ...defaultSettings[key], ...settings[key] };
+                }
+            }
 
-            // Populate Verification Settings
-            verificationChannelIdInput.value = dummySettings.verification.channelId;
-            unverifiedRoleIdInput.value = dummySettings.verification.unverifiedRoleId;
-            verifiedRoleIdInput.value = dummySettings.verification.verifiedRoleId;
-            verificationMessageContentInput.value = dummySettings.verification.messageContent;
-            
-            // Populate Embed Builder fields for Verification
-            verificationEmbedTitleInput.value = dummySettings.verification.embed.title;
-            verificationEmbedDescriptionInput.value = dummySettings.verification.embed.description;
-            verificationEmbedColorInput.value = dummySettings.verification.embed.color;
-            verificationEmbedFooterInput.value = dummySettings.verification.embed.footer.text;
-            verificationEmbedThumbnailInput.value = dummySettings.verification.embed.thumbnail.url;
-            updateVerificationEmbedPreview(); // Update preview after loading
+            // Populate input fields
+            botPrefixInput.value = settings.general.botPrefix;
+            defaultRoleInput.value = settings.general.defaultRole;
+
+            welcomeChannelInput.value = settings.welcome.welcomeChannel;
+            welcomeMessageInput.value = settings.welcome.welcomeMessage;
+            welcomeDMCheckbox.checked = settings.welcome.sendWelcomeDM;
+            farewellChannelInput.value = settings.welcome.farewellChannel;
+            farewellMessageInput.value = settings.welcome.farewellMessage;
+
+            logChannelInput.value = settings.logging.logChannel;
+            logMessagesCheckbox.checked = settings.logging.logMessages;
+            logChannelsCheckbox.checked = settings.logging.logChannels;
+            logMembersCheckbox.checked = settings.logging.logMembers;
+
+            ticketCategoryInput.value = settings.ticket.ticketCategory;
+            ticketRoleInput.value = settings.ticket.ticketRole;
+            ticketMessageInput.value = settings.ticket.ticketMessage;
+
+            verificationChannelIdInput.value = settings.verification.channelId;
+            unverifiedRoleIdInput.value = settings.verification.unverifiedRoleId;
+            verifiedRoleIdInput.value = settings.verification.verifiedRoleId;
+            verificationMessageContentInput.value = settings.verification.messageContent;
+            verificationEmbedTitleInput.value = settings.verification.embed.title;
+            verificationEmbedDescriptionInput.value = settings.verification.embed.description;
+            verificationEmbedColorInput.value = settings.verification.embed.color;
+            verificationEmbedFooterInput.value = settings.verification.embed.footer.text;
+            verificationEmbedThumbnailInput.value = settings.verification.embed.thumbnail.url;
+            updateVerificationEmbedPreview();
+
+            // Custom Commands
+            renderCustomCommands(settings.customCommands);
+
+            // Reaction Roles
+            renderReactionRoles(settings.reactionRoles);
+
+            // Leveling
+            xpPerMessageInput.value = settings.leveling.xpPerMessage;
+            xpCooldownInput.value = settings.leveling.xpCooldown;
+            levelUpMessageInput.value = settings.leveling.levelUpMessage;
+            levelUpChannelInput.value = settings.leveling.levelUpChannel;
+            renderLevelRewards(settings.leveling.rewards);
+
+            // Music
+            musicChannelInput.value = settings.music.musicChannel;
+            djRoleIdInput.value = settings.music.djRoleId;
+            allowAnyoneQueueCheckbox.checked = settings.music.allowAnyoneQueue;
+
+            // Integrations
+            webhookUrlInput.value = settings.integrations.webhookUrl;
+            webhookChannelIdInput.value = settings.integrations.webhookChannelId;
+
+            commandCooldownInput.value = settings.advanced.commandCooldown;
+            enableAICheckbox.checked = settings.advanced.enableAI;
+            adminRoleIdInput.value = settings.advanced.adminRoleId;
 
             // Clear Announcement Builder fields on guild change
             announcementChannelIdInput.value = '';
@@ -858,12 +1570,26 @@
             announcementEmbedColorInput.value = '#5F9EA0'; // Default color
             announcementEmbedFooterInput.value = '';
             announcementEmbedThumbnailInput.value = '';
-            updateAnnouncementEmbedPreview(); // Clear announcement preview
+            updateAnnouncementEmbedPreview();
+
+            // Load Analytics Data
+            totalMembersSpan.textContent = settings.analytics.totalMembers.toLocaleString();
+            messages24hSpan.textContent = settings.analytics.messages24h.toLocaleString();
+            newMembers7dSpan.textContent = settings.analytics.newMembers7d.toLocaleString();
+            renderMemberGrowthChart(settings.analytics.labels, settings.analytics.memberGrowthData);
+            renderMessageActivityChart(settings.analytics.labels, settings.analytics.messageActivityData);
+
+            // Load Audit Log
+            loadAuditLog(guildId); // This will also handle initial filtering
         }
 
+        /**
+         * Saves settings for the currently selected guild (simulated to localStorage).
+         * @param {string} settingType - The category of settings being saved (e.g., 'general', 'welcome').
+         */
         async function saveSettings(settingType) {
             if (!selectedGuildId) {
-                alert('Please select a guild first!');
+                await showCustomModal('Error', 'Please select a server first!', false);
                 return;
             }
 
@@ -871,64 +1597,106 @@
             let statusMessageElement;
             let saveButtonElement;
 
-            if (settingType === 'general') {
-                dataToSave = {
-                    botPrefix: botPrefixInput.value,
-                    defaultRole: defaultRoleInput.value,
-                    welcomeChannelId: welcomeChannelInput.value, // Ensure welcome channel is saved with general settings
-                    farewellChannelId: farewellChannelInput.value // Ensure farewell channel is saved with general settings
-                };
-                statusMessageElement = generalStatusMsg;
-                saveButtonElement = saveGeneralSettingsBtn;
-            } else if (settingType === 'welcome') {
-                // This block might become redundant if welcome settings are moved to general
-                dataToSave = {
-                    welcomeMessage: welcomeMessageInput.value,
-                    sendWelcomeDM: welcomeDMCheckbox.checked
-                };
-                statusMessageElement = welcomeStatusMsg;
-                saveButtonElement = saveWelcomeSettingsBtn;
-            } else if (settingType === 'logging') {
-                dataToSave = {
-                    logChannel: logChannelInput.value,
-                    logMessages: logMessagesCheckbox.checked,
-                    logChannels: logChannelsCheckbox.checked
-                };
-                statusMessageElement = loggingStatusMsg;
-                saveButtonElement = saveLoggingSettingsBtn;
-            } else if (settingType === 'ticket') {
-                dataToSave = {
-                    ticketCategory: ticketCategoryInput.value,
-                    ticketRole: ticketRoleInput.value
-                };
-                statusMessageElement = ticketStatusMsg;
-                saveButtonElement = saveTicketSettingsBtn;
-            } else if (settingType === 'verification') { // NEW SAVE LOGIC
-                dataToSave = {
-                    channelId: verificationChannelIdInput.value,
-                    unverifiedRoleId: unverifiedRoleIdInput.value,
-                    verifiedRoleId: verifiedRoleIdInput.value,
-                    messageContent: verificationMessageContentInput.value,
-                    embed: {
-                        title: verificationEmbedTitleInput.value,
-                        description: verificationEmbedDescriptionInput.value,
-                        color: verificationEmbedColorInput.value,
-                        footer: { text: verificationEmbedFooterInput.value },
-                        thumbnail: { url: verificationEmbedThumbnailInput.value }
-                    }
-                };
-                statusMessageElement = verificationStatusMsg;
-                saveButtonElement = saveVerificationSettingsBtn;
-            } else if (settingType === 'advanced') {
-                dataToSave = {
-                    commandCooldown: parseInt(commandCooldownInput.value, 10),
-                    enableAI: enableAICheckbox.checked
-                };
-                statusMessageElement = advancedStatusMsg;
-                saveButtonElement = saveAdvancedSettingsBtn;
-            } else {
-                console.error('Unknown setting type:', settingType);
-                return;
+            // Get current settings from localStorage or default if not exists
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+
+            // Populate dataToSave based on settingType
+            switch (settingType) {
+                case 'general':
+                    dataToSave = {
+                        botPrefix: botPrefixInput.value,
+                        defaultRole: defaultRoleInput.value
+                    };
+                    statusMessageElement = generalStatusMsg;
+                    saveButtonElement = saveGeneralSettingsBtn;
+                    break;
+                case 'welcome':
+                    dataToSave = {
+                        welcomeChannel: welcomeChannelInput.value,
+                        welcomeMessage: welcomeMessageInput.value,
+                        sendWelcomeDM: welcomeDMCheckbox.checked,
+                        farewellChannel: farewellChannelInput.value,
+                        farewellMessage: farewellMessageInput.value
+                    };
+                    statusMessageElement = welcomeStatusMsg;
+                    saveButtonElement = saveWelcomeSettingsBtn;
+                    break;
+                case 'logging':
+                    dataToSave = {
+                        logChannel: logChannelInput.value,
+                        logMessages: logMessagesCheckbox.checked,
+                        logChannels: logChannelsCheckbox.checked,
+                        logMembers: logMembersCheckbox.checked
+                    };
+                    statusMessageElement = loggingStatusMsg;
+                    saveButtonElement = saveLoggingSettingsBtn;
+                    break;
+                case 'ticket':
+                    dataToSave = {
+                        ticketCategory: ticketCategoryInput.value,
+                        ticketRole: ticketRoleInput.value,
+                        ticketMessage: ticketMessageInput.value
+                    };
+                    statusMessageElement = ticketStatusMsg;
+                    saveButtonElement = saveTicketSettingsBtn;
+                    break;
+                case 'verification':
+                    dataToSave = {
+                        channelId: verificationChannelIdInput.value,
+                        unverifiedRoleId: unverifiedRoleIdInput.value,
+                        verifiedRoleId: verifiedRoleIdInput.value,
+                        messageContent: verificationMessageContentInput.value,
+                        embed: {
+                            title: verificationEmbedTitleInput.value,
+                            description: verificationEmbedDescriptionInput.value,
+                            color: verificationEmbedColorInput.value,
+                            footer: { text: verificationEmbedFooterInput.value },
+                            thumbnail: { url: verificationEmbedThumbnailInput.value }
+                        }
+                    };
+                    statusMessageElement = verificationStatusMsg;
+                    saveButtonElement = saveVerificationSettingsBtn;
+                    break;
+                case 'leveling':
+                    dataToSave = {
+                        xpPerMessage: parseInt(xpPerMessageInput.value, 10),
+                        xpCooldown: parseInt(xpCooldownInput.value, 10),
+                        levelUpMessage: levelUpMessageInput.value,
+                        levelUpChannel: levelUpChannelInput.value,
+                        rewards: currentSettings.leveling ? currentSettings.leveling.rewards : [] // Retain existing rewards
+                    };
+                    statusMessageElement = levelingStatusMsg;
+                    saveButtonElement = saveLevelingSettingsBtn;
+                    break;
+                case 'music':
+                    dataToSave = {
+                        musicChannel: musicChannelInput.value,
+                        djRoleId: djRoleIdInput.value,
+                        allowAnyoneQueue: allowAnyoneQueueCheckbox.checked
+                    };
+                    statusMessageElement = musicStatusMsg;
+                    saveButtonElement = saveMusicSettingsBtn;
+                    break;
+                case 'integrations':
+                    dataToSave = {
+                        webhookUrl: webhookUrlInput.value,
+                        webhookChannelId: webhookChannelIdInput.value
+                    };
+                    statusMessageElement = integrationsStatusMsg;
+                    saveButtonElement = saveIntegrationsSettingsBtn;
+                    break;
+                case 'advanced':
+                    dataToSave = {
+                        commandCooldown: parseInt(commandCooldownInput.value, 10),
+                        enableAI: enableAICheckbox.checked,
+                        adminRoleId: adminRoleIdInput.value
+                    };
+                    statusMessageElement = advancedStatusMsg;
+                    saveButtonElement = saveAdvancedSettingsBtn;
+                    break;
+                default:
+                    console.error('Unknown setting type:', settingType);
+                    return;
             }
 
             // Disable button and show saving status
@@ -938,65 +1706,371 @@
             statusMessageElement.classList.add('show');
 
             try {
-                // In a real application, you would send this data to your backend API:
-                // const response = await fetch(`${BASE_URL}/api/settings/${selectedGuildId}/${settingType}`, {
-                //     method: 'POST', // Or PATCH
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(dataToSave)
-                // });
-                // if (!response.ok) {
-                //     throw new Error('Server responded with an error.');
-                // }
-                // const result = await response.json(); // If your API returns a confirmation
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                console.log(`Simulating saving ${settingType} settings for guild ${selectedGuildId}:`, dataToSave);
+                // Update the specific settingType in currentSettings
+                currentSettings[settingType] = { ...currentSettings[settingType], ...dataToSave };
+                localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
 
-                // Simulate API call delay and success/failure
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-                const success = Math.random() > 0.1; // 90% chance of success for demo
-
-                if (success) {
-                    statusMessageElement.textContent = 'Settings saved successfully!';
-                    statusMessageElement.classList.add('status-success');
-                } else {
-                    throw new Error('Failed to save settings on the server.');
-                }
+                statusMessageElement.textContent = 'Settings saved successfully!';
+                statusMessageElement.classList.add('status-success');
+                console.log(`Saved ${settingType} settings for guild ${selectedGuildId}:`, dataToSave);
             } catch (error) {
                 console.error('Error saving settings:', error);
                 statusMessageElement.textContent = `Error: ${error.message}`;
                 statusMessageElement.classList.add('status-error');
             } finally {
                 saveButtonElement.disabled = false;
-                // Hide status message after a few seconds
                 setTimeout(() => {
                     statusMessageElement.classList.remove('show');
                 }, 3000);
             }
         }
 
+        /**
+         * Adds a new custom command to the list (simulated to localStorage).
+         */
+        async function addCustomCommand() {
+            if (!selectedGuildId) {
+                await showCustomModal('Error', 'Please select a server first!', false);
+                return;
+            }
+
+            const commandName = newCommandNameInput.value.trim().toLowerCase();
+            const commandResponse = newCommandResponseInput.value.trim();
+            const commandType = newCommandTypeInput.value;
+
+            if (!commandName || !commandResponse) {
+                customCommandStatusMsg.textContent = 'Command name and response cannot be empty.';
+                customCommandStatusMsg.classList.add('show', 'status-error');
+                setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            let commandData = { name: commandName, response: commandResponse, type: commandType };
+
+            if (commandType === 'embed') {
+                commandData.embed = {
+                    title: newCommandEmbedTitleInput.value.trim(),
+                    description: newCommandEmbedDescriptionInput.value.trim(),
+                    color: newCommandEmbedColorInput.value.trim()
+                };
+                if (!commandData.embed.title && !commandData.embed.description) {
+                    customCommandStatusMsg.textContent = 'Embed commands require at least a title or description.';
+                    customCommandStatusMsg.classList.add('show', 'status-error');
+                    setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+                    return;
+                }
+            }
+
+            // Load current settings
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.customCommands = currentSettings.customCommands || [];
+
+            // Check for duplicate command names
+            if (currentSettings.customCommands.some(cmd => cmd.name === commandName)) {
+                await showCustomModal('Error', `A command named '${commandName}' already exists.`, false);
+                return;
+            }
+
+            currentSettings.customCommands.push(commandData);
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            customCommandStatusMsg.textContent = `Command '${commandName}' added successfully!`;
+            customCommandStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+
+            // Clear form fields
+            newCommandNameInput.value = '';
+            newCommandResponseInput.value = '';
+            newCommandTypeInput.value = 'text';
+            newCommandEmbedFieldsDiv.classList.add('hidden');
+            newCommandEmbedTitleInput.value = '';
+            newCommandEmbedDescriptionInput.value = '';
+            newCommandEmbedColorInput.value = '';
+
+            renderCustomCommands(currentSettings.customCommands);
+        }
+
+        /**
+         * Renders the list of custom commands.
+         * @param {Array<Object>} commands - Array of custom command objects.
+         */
+        function renderCustomCommands(commands) {
+            const customCommandsList = document.getElementById('customCommandsList');
+            customCommandsList.innerHTML = ''; // Clear existing list
+
+            if (commands.length === 0) {
+                customCommandsList.innerHTML = '<li class="text-gray-400">No custom commands added yet.</li>';
+                return;
+            }
+
+            commands.forEach((cmd, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex items-center justify-between p-3 rounded-md bg-gray-800 border border-gray-700';
+                listItem.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-semibold text-white">!${cmd.name}</span>
+                        <p class="text-gray-400 text-sm truncate">${cmd.type === 'text' ? cmd.response : `[Embed] ${cmd.embed.title || cmd.embed.description}`}</p>
+                    </div>
+                    <button class="text-red-400 hover:text-red-600 ml-4 delete-command-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                `;
+                customCommandsList.appendChild(listItem);
+            });
+
+            // Add event listeners for delete buttons
+            customCommandsList.querySelectorAll('.delete-command-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index, 10);
+                    deleteCustomCommand(index);
+                });
+            });
+        }
+
+        /**
+         * Deletes a custom command from the list (simulated to localStorage).
+         * @param {number} index - The index of the command to delete.
+         */
+        async function deleteCustomCommand(index) {
+            const confirmed = await showCustomModal('Confirm Deletion', 'Are you sure you want to delete this custom command?', true);
+            if (!confirmed) {
+                return;
+            }
+
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.customCommands.splice(index, 1);
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            customCommandStatusMsg.textContent = 'Command deleted successfully!';
+            customCommandStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+
+            renderCustomCommands(currentSettings.customCommands);
+        }
+
+        /**
+         * Adds a new reaction role to the list (simulated to localStorage).
+         */
+        async function addReactionRole() {
+            if (!selectedGuildId) {
+                await showCustomModal('Error', 'Please select a server first!', false);
+                return;
+            }
+
+            const channelId = reactionRoleChannelIdInput.value.trim();
+            const messageContent = reactionRoleMessageContentInput.value.trim();
+            const emoji = reactionRoleEmojiInput.value.trim();
+            const roleId = reactionRoleRoleIdInput.value.trim();
+
+            if (!channelId || !messageContent || !emoji || !roleId) {
+                reactionRoleStatusMsg.textContent = 'All fields are required for a reaction role.';
+                reactionRoleStatusMsg.classList.add('show', 'status-error');
+                setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.reactionRoles = currentSettings.reactionRoles || [];
+
+            const newReactionRole = { channelId, messageContent, emoji, roleId };
+            currentSettings.reactionRoles.push(newReactionRole);
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            reactionRoleStatusMsg.textContent = 'Reaction role added successfully!';
+            reactionRoleStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+
+            // Clear form fields
+            reactionRoleChannelIdInput.value = '';
+            reactionRoleMessageContentInput.value = '';
+            reactionRoleEmojiInput.value = '';
+            reactionRoleRoleIdInput.value = '';
+
+            renderReactionRoles(currentSettings.reactionRoles);
+        }
+
+        /**
+         * Renders the list of reaction roles.
+         * @param {Array<Object>} reactionRoles - Array of reaction role objects.
+         */
+        function renderReactionRoles(reactionRoles) {
+            const reactionRolesList = document.getElementById('reactionRolesList');
+            reactionRolesList.innerHTML = '';
+
+            if (reactionRoles.length === 0) {
+                reactionRolesList.innerHTML = '<li class="text-gray-400">No reaction roles configured yet.</li>';
+                return;
+            }
+
+            reactionRoles.forEach((rr, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex items-center justify-between p-3 rounded-md bg-gray-800 border border-gray-700';
+                listItem.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-semibold text-white">Channel: ${rr.channelId}</span>
+                        <p class="text-gray-400 text-sm truncate">Emoji: ${rr.emoji} -> Role: ${rr.roleId}</p>
+                        <p class="text-gray-500 text-xs truncate">${rr.messageContent}</p>
+                    </div>
+                    <button class="text-red-400 hover:text-red-600 ml-4 delete-reaction-role-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                `;
+                reactionRolesList.appendChild(listItem);
+            });
+
+            reactionRolesList.querySelectorAll('.delete-reaction-role-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index, 10);
+                    deleteReactionRole(index);
+                });
+            });
+        }
+
+        /**
+         * Deletes a reaction role from the list (simulated to localStorage).
+         * @param {number} index - The index of the reaction role to delete.
+         */
+        async function deleteReactionRole(index) {
+            const confirmed = await showCustomModal('Confirm Deletion', 'Are you sure you want to delete this reaction role?', true);
+            if (!confirmed) {
+                return;
+            }
+
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.reactionRoles.splice(index, 1);
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            reactionRoleStatusMsg.textContent = 'Reaction role deleted successfully!';
+            reactionRoleStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+
+            renderReactionRoles(currentSettings.reactionRoles);
+        }
+
+        /**
+         * Adds a new level reward to the list (simulated to localStorage).
+         */
+        async function addLevelReward() {
+            if (!selectedGuildId) {
+                await showCustomModal('Error', 'Please select a server first!', false);
+                return;
+            }
+
+            const level = parseInt(rewardLevelInput.value, 10);
+            const roleId = rewardRoleIdInput.value.trim();
+
+            if (isNaN(level) || level <= 0 || !roleId) {
+                levelingStatusMsg.textContent = 'Please provide a valid level and role ID.';
+                levelingStatusMsg.classList.add('show', 'status-error');
+                setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
+                return;
+            }
+
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.leveling = currentSettings.leveling || {};
+            currentSettings.leveling.rewards = currentSettings.leveling.rewards || [];
+
+            // Check for duplicate level rewards
+            if (currentSettings.leveling.rewards.some(reward => reward.level === level)) {
+                await showCustomModal('Error', `A reward for level ${level} already exists.`, false);
+                return;
+            }
+
+            currentSettings.leveling.rewards.push({ level, roleId });
+            currentSettings.leveling.rewards.sort((a, b) => a.level - b.level); // Keep sorted
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            levelingStatusMsg.textContent = `Level reward for level ${level} added successfully!`;
+            levelingStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
+
+            // Clear form fields
+            rewardLevelInput.value = '';
+            rewardRoleIdInput.value = '';
+
+            renderLevelRewards(currentSettings.leveling.rewards);
+        }
+
+        /**
+         * Renders the list of level rewards.
+         * @param {Array<Object>} rewards - Array of level reward objects.
+         */
+        function renderLevelRewards(rewards) {
+            const levelRewardsList = document.getElementById('levelRewardsList');
+            levelRewardsList.innerHTML = '';
+
+            if (rewards.length === 0) {
+                levelRewardsList.innerHTML = '<li class="text-gray-400">No level rewards configured yet.</li>';
+                return;
+            }
+
+            rewards.forEach((reward, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex items-center justify-between p-3 rounded-md bg-gray-800 border border-gray-700';
+                listItem.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-semibold text-white">Level ${reward.level}:</span>
+                        <p class="text-gray-400 text-sm">Role ID: ${reward.roleId}</p>
+                    </div>
+                    <button class="text-red-400 hover:text-red-600 ml-4 delete-level-reward-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                `;
+                levelRewardsList.appendChild(listItem);
+            });
+
+            levelRewardsList.querySelectorAll('.delete-level-reward-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index, 10);
+                    deleteLevelReward(index);
+                });
+            });
+        }
+
+        /**
+         * Deletes a level reward from the list (simulated to localStorage).
+         * @param {number} index - The index of the reward to delete.
+         */
+        async function deleteLevelReward(index) {
+            const confirmed = await showCustomModal('Confirm Deletion', 'Are you sure you want to delete this level reward?', true);
+            if (!confirmed) {
+                return;
+            }
+
+            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            currentSettings.leveling.rewards.splice(index, 1);
+            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+
+            levelingStatusMsg.textContent = 'Level reward deleted successfully!';
+            levelingStatusMsg.classList.add('show', 'status-success');
+            setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
+
+            renderLevelRewards(currentSettings.leveling.rewards);
+        }
+
+
+        /**
+         * Sends an announcement message (simulated).
+         */
         async function sendAnnouncement() {
             if (!selectedGuildId) {
-                alert('Please select a guild first!');
+                await showCustomModal('Error', 'Please select a server first!', false);
                 return;
             }
 
             const channelId = announcementChannelIdInput.value.trim();
-            const embedTitle = announcementEmbedTitleInput.value.trim(); // Corrected reference
-            const embedDescription = announcementEmbedDescriptionInput.value.trim(); // Corrected reference
-            const embedColor = announcementEmbedColorInput.value.trim(); // Corrected reference
-            const embedFooterText = announcementEmbedFooterInput.value.trim(); // Corrected reference
-            const embedThumbnailUrl = announcementEmbedThumbnailInput.value.trim(); // Corrected reference
+            const embedTitle = announcementEmbedTitleInput.value.trim();
+            const embedDescription = announcementEmbedDescriptionInput.value.trim();
+            const embedColor = announcementEmbedColorInput.value.trim();
+            const embedFooterText = announcementEmbedFooterInput.value.trim();
+            const embedThumbnailUrl = announcementEmbedThumbnailInput.value.trim();
 
-
-            if (!channelId || !embedTitle || !embedDescription) {
-                announcementStatusMsg.textContent = 'Please fill in all announcement fields (Channel ID, Title, Description).';
+            if (!channelId || (!embedTitle && !embedDescription)) {
+                announcementStatusMsg.textContent = 'Please provide a Channel ID and at least an Embed Title or Description.';
                 announcementStatusMsg.classList.add('show', 'status-error');
                 setTimeout(() => announcementStatusMsg.classList.remove('show'), 3000);
                 return;
             }
 
-            // Convert hex color to decimal for Discord embed
-            const colorDecimal = parseInt(embedColor.replace('#', ''), 16);
+            // Convert hex color to decimal for Discord embed (if applicable in a real bot)
+            const colorDecimal = embedColor ? parseInt(embedColor.replace('#', ''), 16) : null;
 
             const embedData = {
                 title: embedTitle,
@@ -1004,7 +2078,7 @@
                 color: colorDecimal,
                 timestamp: new Date().toISOString(), // Current time
                 footer: {
-                    text: embedFooterText || 'ZeroPoint Bot Announcement' // Use provided footer or default
+                    text: embedFooterText || 'ZeroPoint Bot Announcement'
                 }
             };
 
@@ -1019,29 +2093,26 @@
             announcementStatusMsg.classList.add('show');
 
             try {
-                const response = await fetch(`${BASE_URL}/api/send-announcement/${selectedGuildId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ channelId, embedData })
-                });
+                // Simulate sending to backend
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const success = Math.random() > 0.1; // 90% chance of success for demo
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to send announcement.');
+                if (success) {
+                    announcementStatusMsg.textContent = 'Announcement sent successfully!';
+                    announcementStatusMsg.classList.add('status-success');
+                    console.log(`Simulated announcement sent to channel ${channelId} in guild ${selectedGuildId}:`, embedData);
+
+                    // Clear fields after successful send
+                    announcementChannelIdInput.value = '';
+                    announcementEmbedTitleInput.value = '';
+                    announcementEmbedDescriptionInput.value = '';
+                    announcementEmbedColorInput.value = '#5F9EA0';
+                    announcementEmbedFooterInput.value = '';
+                    announcementEmbedThumbnailInput.value = '';
+                    updateAnnouncementEmbedPreview();
+                } else {
+                    throw new Error('Failed to send announcement (simulated backend error).');
                 }
-
-                announcementStatusMsg.textContent = 'Announcement sent successfully!';
-                announcementStatusMsg.classList.add('status-success');
-
-                // Clear fields after successful send
-                announcementChannelIdInput.value = '';
-                announcementEmbedTitleInput.value = '';
-                announcementEmbedDescriptionInput.value = '';
-                announcementEmbedColorInput.value = '#5F9EA0';
-                announcementEmbedFooterInput.value = '';
-                announcementEmbedThumbnailInput.value = '';
-                updateAnnouncementEmbedPreview(); // Clear announcement preview
-
             } catch (error) {
                 console.error('Error sending announcement:', error);
                 announcementStatusMsg.textContent = `Error: ${error.message}`;
@@ -1054,7 +2125,9 @@
             }
         }
 
-        // Function to update verification embed preview
+        /**
+         * Updates the preview of the verification embed based on input fields.
+         */
         function updateVerificationEmbedPreview() {
             previewVerificationEmbedTitle.textContent = verificationEmbedTitleInput.value || 'Verification Embed Title';
             previewVerificationEmbedDescription.textContent = verificationEmbedDescriptionInput.value || 'Click the button to gain full access.';
@@ -1077,7 +2150,9 @@
             }
         }
 
-        // Function to update announcement embed preview
+        /**
+         * Updates the preview of the announcement embed based on input fields.
+         */
         function updateAnnouncementEmbedPreview() {
             previewAnnouncementEmbedTitle.textContent = announcementEmbedTitleInput.value || 'Important Update!';
             previewAnnouncementEmbedDescription.textContent = announcementEmbedDescriptionInput.value || 'Details about the announcement...';
@@ -1100,42 +2175,275 @@
             }
         }
 
-        // Navigation Logic
+        /**
+         * Shows a specific settings section and updates navigation active state.
+         * @param {string} sectionId - The ID of the section to show (e.g., 'general-settings').
+         */
         function showSection(sectionId) {
+            // Hide all settings sections
             document.querySelectorAll('.settings-section').forEach(section => {
                 section.classList.add('hidden');
             });
+
+            // Show the requested section
             document.getElementById(sectionId).classList.remove('hidden');
 
+            // Deactivate all sidebar navigation items
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
-            // Ensure the correct navigation item is activated
+
+            // Activate the corresponding sidebar navigation item
             const navItemId = `nav-${sectionId.replace('-settings', '')}`;
             const navItem = document.getElementById(navItemId);
             if (navItem) {
                 navItem.classList.add('active');
             }
+
+            // Special handling for analytics charts (re-render when visible)
+            if (sectionId === 'analytics-settings' && selectedGuildId) {
+                const settings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+                renderMemberGrowthChart(settings.analytics.labels, settings.analytics.memberGrowthData);
+                renderMessageActivityChart(settings.analytics.labels, settings.analytics.messageActivityData);
+            }
         }
 
-        // Initial navigation setup (moved from top of file to ensure elements exist)
-        // This part needs to be in the HTML to be clickable, but the JS listeners need to be assigned after DOMContentLoaded
-        // The HTML already has the sidebar structure, so we just need to ensure the listeners are correct.
-        // The original HTML had a simple `<a>` tag with `id="nav-general"` and `id="nav-verification"`.
-        // The `showSection` function already handles adding/removing 'hidden' and 'active' classes.
-
-        // Event listeners for sidebar navigation (already present in original code, just ensuring they are inside DOMContentLoaded)
-        if (navGeneral) {
-            navGeneral.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('general-settings');
+        /**
+         * Renders the Member Growth Chart using Chart.js.
+         * @param {Array<string>} labels - Labels for the X-axis (e.g., dates).
+         * @param {Array<number>} data - Data points for the chart.
+         */
+        function renderMemberGrowthChart(labels, data) {
+            if (memberGrowthChartInstance) {
+                memberGrowthChartInstance.destroy(); // Destroy existing chart if it exists
+            }
+            const ctx = memberGrowthChartCanvas.getContext('2d');
+            memberGrowthChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Members',
+                        data: data,
+                        borderColor: '#5F9EA0', // Cadet Blue
+                        backgroundColor: 'rgba(95, 158, 160, 0.2)',
+                        fill: true,
+                        tension: 0.3, // Smooth curves
+                        pointBackgroundColor: '#5F9EA0',
+                        pointBorderColor: '#FFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#EAEAEA' // Light text for legend
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'Member Growth Over Time',
+                            color: '#EAEAEA'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(85, 85, 85, 0.3)' // Lighter grid lines
+                            },
+                            ticks: {
+                                color: '#B0B0B0' // Light gray ticks
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(85, 85, 85, 0.3)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
             });
         }
 
-        if (navVerification) {
-            navVerification.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection('verification-settings');
+        /**
+         * Renders the Message Activity Chart using Chart.js.
+         * @param {Array<string>} labels - Labels for the X-axis (e.g., dates).
+         * @param {Array<number>} data - Data points for the chart.
+         */
+        function renderMessageActivityChart(labels, data) {
+            if (messageActivityChartInstance) {
+                messageActivityChartInstance.destroy(); // Destroy existing chart if it exists
+            }
+            const ctx = messageActivityChartCanvas.getContext('2d');
+            messageActivityChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Messages Sent',
+                        data: data,
+                        backgroundColor: '#4682B4', // Steel Blue
+                        borderColor: '#4682B4',
+                        borderWidth: 1,
+                        borderRadius: 5 // Rounded bars
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#EAEAEA'
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'Message Activity (Last 7 Days)',
+                            color: '#EAEAEA'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(85, 85, 85, 0.3)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(85, 85, 85, 0.3)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Generates dummy audit log entries for demonstration.
+         * @returns {Array<Object>} An array of dummy audit log entries.
+         */
+        function generateDummyAuditLog() {
+            const users = ['User#1234', 'Admin#0001', 'Moderator#5678', 'Bot#9999'];
+            const actions = [
+                { type: 'MEMBER_KICK', description: 'kicked {target} for spamming.' },
+                { type: 'MEMBER_BAN_ADD', description: 'banned {target} for rule breaking.' },
+                { type: 'CHANNEL_CREATE', description: 'created text channel #general-chat.' },
+                { type: 'ROLE_UPDATE', description: 'updated role "Member" permissions.' },
+                { type: 'MESSAGE_DELETE', description: 'deleted a message by {target}.' },
+                { type: 'GUILD_UPDATE', description: 'changed server name to "The Awesome Place".' },
+                { type: 'MEMBER_ROLE_UPDATE', description: 'added role "Moderator" to {target}.' },
+                { type: 'BOT_ADD', description: 'added bot "HelperBot#1234".' }
+            ];
+            const targets = ['Alice#0001', 'Bob#0002', 'Charlie#0003', 'DiscordUser#5555'];
+
+            const logs = [];
+            for (let i = 0; i < 20; i++) {
+                const user = users[Math.floor(Math.random() * users.length)];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                const target = targets[Math.floor(Math.random() * targets.length)];
+                const timestamp = new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toLocaleString(); // Last 7 days
+
+                let description = action.description.replace('{target}', target);
+
+                logs.push({
+                    id: `log-${Date.now()}-${i}`,
+                    user: user,
+                    type: action.type,
+                    description: description,
+                    timestamp: timestamp
+                });
+            }
+            return logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
+        }
+
+        /**
+         * Loads and renders audit log entries for the selected guild.
+         * Applies search and filter criteria.
+         * @param {string} guildId - The ID of the guild.
+         */
+        async function loadAuditLog(guildId) {
+            if (!guildId) {
+                auditLogListDiv.innerHTML = '<p class="text-gray-400 text-center py-4">Please select a server to view audit logs.</p>';
+                return;
+            }
+
+            auditLogListDiv.innerHTML = '<p class="text-gray-400 text-center py-4">Loading audit log entries...</p>';
+            auditLogStatusMsg.textContent = '';
+            auditLogStatusMsg.classList.remove('show', 'status-success', 'status-error');
+
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const settings = JSON.parse(localStorage.getItem(`guildSettings_${guildId}`)) || {};
+            const allLogs = settings.auditLog || [];
+
+            // Store all logs in a temporary variable for filtering
+            currentAuditLogs = allLogs;
+            filterAuditLog(); // Apply initial filter/search
+        }
+
+        let currentAuditLogs = []; // Stores the full list of logs for the current guild
+
+        /**
+         * Filters and renders the audit log entries based on search query and type filter.
+         */
+        function filterAuditLog() {
+            const searchQuery = auditLogSearchInput.value.toLowerCase();
+            const filterType = auditLogFilterTypeSelect.value;
+
+            let filteredLogs = currentAuditLogs.filter(log => {
+                const matchesSearch = log.user.toLowerCase().includes(searchQuery) ||
+                                      log.description.toLowerCase().includes(searchQuery) ||
+                                      log.type.toLowerCase().includes(searchQuery);
+                const matchesType = filterType === '' || log.type === filterType;
+                return matchesSearch && matchesType;
+            });
+
+            renderAuditLogEntries(filteredLogs);
+        }
+
+        /**
+         * Renders the given audit log entries into the UI.
+         * @param {Array<Object>} logs - Array of audit log entries to render.
+         */
+        function renderAuditLogEntries(logs) {
+            auditLogListDiv.innerHTML = ''; // Clear existing list
+
+            if (logs.length === 0) {
+                auditLogListDiv.innerHTML = '<p class="text-gray-400 text-center py-4">No audit log entries found matching your criteria.</p>';
+                return;
+            }
+
+            logs.forEach(log => {
+                const logItem = document.createElement('div');
+                logItem.className = 'p-3 rounded-md bg-gray-800 border border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center';
+                logItem.innerHTML = `
+                    <div class="flex-1 mb-2 sm:mb-0">
+                        <p class="font-semibold text-white">${log.user} <span class="text-gray-500 text-sm ml-2">(${log.type.replace('_', ' ')})</span></p>
+                        <p class="text-gray-300 text-sm">${log.description}</p>
+                    </div>
+                    <span class="text-gray-500 text-xs sm:text-sm flex-shrink-0">${log.timestamp}</span>
+                `;
+                auditLogListDiv.appendChild(logItem);
             });
         }
     </script>
