@@ -87,19 +87,17 @@ const pgPoolConfig = {
     connectionString: DATABASE_URL,
 };
 
-// Conditionally add SSL options if running in production AND DATABASE_URL starts with 'postgres://' (common for cloud DBs)
-// If your Coolify PostgreSQL is internal and doesn't use SSL, leave this commented or set to false
-// If it uses SSL with a self-signed cert, you might need rejectUnauthorized: false
-if (process.env.NODE_ENV === 'production' && DATABASE_URL && DATABASE_URL.startsWith('postgres')) {
-    // Check if the URL explicitly requests SSL (e.g., ?sslmode=require) or if it's a known cloud provider
-    // For Coolify internal PostgreSQL, you typically do NOT need SSL unless explicitly configured.
-    // If you get 'self-signed certificate' errors, uncomment and set rejectUnauthorized to false.
-    // pgPoolConfig.ssl = {
-    //     rejectUnauthorized: false
-    // };
-    console.log("[DEBUG] PostgreSQL client configured for potential SSL (check if needed for your Coolify DB).");
+// Always include SSL options if the DATABASE_URL starts with 'postgres' (indicating a PostgreSQL connection)
+// This is crucial for many cloud-hosted or internal Coolify PostgreSQL instances that enforce SSL.
+// rejectUnauthorized: false is used for self-signed certificates common in internal networks.
+if (DATABASE_URL && DATABASE_URL.startsWith('postgres')) {
+    pgPoolConfig.ssl = {
+        rejectUnauthorized: false // WARNING: Use this only if you trust the PostgreSQL server and its network.
+                                  // In production with a public PostgreSQL, you'd typically use a CA certificate.
+    };
+    console.log("[DEBUG] PostgreSQL client configured for SSL with rejectUnauthorized: false.");
 } else {
-    console.log("[DEBUG] PostgreSQL client configured for non-SSL connection.");
+    console.log("[DEBUG] PostgreSQL client configured for non-SSL connection (or DATABASE_URL not set/invalid).");
 }
 
 
