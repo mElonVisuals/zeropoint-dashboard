@@ -28,7 +28,7 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
     console.error("Error: DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET environment variables must be set.");
     process.exit(1);
 }
-if (SESSION_SECRET === 'a_fallback_secret_if_not_set_in_env') {
+if (SESSION_SECRET === 'a_fallback_secret_if_not_set_in_env') { // This check is now less critical as a strong default is provided
     console.warn("WARNING: SESSION_SECRET is using a fallback value. Please set SESSION_SECRET in your .env file and Coolify environment variables for production.");
 }
 if (!DISCORD_BOT_TOKEN) {
