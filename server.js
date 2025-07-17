@@ -22,8 +22,8 @@ const PORT = 3000;
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://dashboard.melonvisuals.me/auth/discord/callback';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'c4j9K!pZ@x7sQ_rVf8tYuB$eN%wX&aC*dF+gH-jK=lLmN~oP:qRsT<uV>wX?yZ[0123456789]{|}~'; // IMPORTANT: Use a strong secret from .env
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // NEW: Bot token for fetching bot's guilds
 const REDIS_URL = process.env.REDIS_URL; // NEW: Redis connection URL
 
@@ -85,11 +85,15 @@ passport.use(new DiscordStrategy({
     // In this example, we're just passing the profile directly.
     // In a real application, you'd save/find the user in your database here.
     console.log("[DEBUG] DiscordStrategy Callback: User Profile ID", profile.id);
-    // Removed: profile.sessionID = this.sessionID; // This was problematic
     return done(null, profile);
 }));
 
 // --- Express Middleware ---
+
+// CRITICAL FOR PROXY ENVIRONMENTS LIKE COOLIFY: Trust the proxy headers
+// This ensures Express correctly interprets secure connections and session IDs
+app.set('trust proxy', 1);
+console.log("[DEBUG] Express 'trust proxy' set to 1.");
 
 // Initialize Redis client options
 const redisClientOptions = {
