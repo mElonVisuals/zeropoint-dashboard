@@ -632,10 +632,23 @@
             showSection('general-settings');
         });
 
+        // Show a temporary message to the user
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
         async function fetchUserData() {
             try {
                 const response = await fetch(BASE_URL + '/user');
                 if (!response.ok) {
+                    // Show error message on UI
+                    showMessage('Failed to load user data. You might need to log in again.', 'error');
                     throw new Error('Not authenticated or API error: ' + response.statusText);
                 }
                 const data = await response.json();
@@ -651,6 +664,8 @@
             try {
                 const response = await fetch(BASE_URL + '/bot-guilds');
                 if (!response.ok) {
+                    // Show error message on UI
+                    showMessage('Failed to load server list. Please ensure the bot is running and authenticated.', 'error');
                     throw new Error('Failed to fetch bot guilds: ' + response.statusText);
                 }
                 botGuilds = await response.json();
