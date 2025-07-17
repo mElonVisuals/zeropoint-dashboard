@@ -7,11 +7,12 @@
     <!-- Tailwind CSS CDN for utility classes -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter for modern typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.css.gg/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+
     <style>
         /* Base Styles: Setting up the primary font, background, and text color */
         body {
@@ -955,11 +956,9 @@
         const BASE_URL = window.location.origin;
 
         // Global variables for dashboard state
-        let userGuilds = []; // Stores guilds the user is a member of
         let botGuilds = [];  // Stores guilds the bot is present in
         let selectedGuildId = null; // Currently selected guild ID
         let selectedGuildName = ''; // Currently selected guild name
-        let currentUserId = null; // Stores the authenticated user's ID
 
         // Chart instances
         let memberGrowthChartInstance = null;
@@ -1122,7 +1121,7 @@
             previewAnnouncementEmbedFooter = document.getElementById('preview-announcement-embed-footer');
             previewAnnouncementEmbedThumbnail = document.getElementById('preview-announcement-embed-thumbnail');
 
-            // Buttons
+            // Save/Action buttons
             saveGeneralSettingsBtn = document.getElementById('saveGeneralSettings');
             saveWelcomeSettingsBtn = document.getElementById('saveWelcomeSettings');
             saveLoggingSettingsBtn = document.getElementById('saveLoggingSettings');
@@ -1176,43 +1175,10 @@
             document.getElementById('current-year').textContent = new Date().getFullYear();
 
             // --- Authentication and Data Fetching ---
-            // The `initialAuthToken` is provided by the Canvas environment for authentication.
-            // This part is crucial for identifying the user.
-            // Note: Firebase authentication is used here as provided by the Canvas environment
-            // to get the current user ID. This ID is then used for backend API calls.
-            if (typeof auth !== 'undefined' && typeof onAuthStateChanged !== 'undefined') {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        console.log("Authenticated user ID:", currentUserId);
-                        await fetchUserData(); // Fetch user data from backend
-                        await fetchBotGuilds(); // Fetch bot guilds from backend
-                    } else {
-                        // If no user is authenticated, try to sign in anonymously
-                        // or with the custom token if provided.
-                        try {
-                            // __initial_auth_token is provided by the Canvas environment
-                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                                console.log("Signed in with custom token.");
-                            } else {
-                                await signInAnonymously(auth);
-                                console.log("Signed in anonymously.");
-                            }
-                        } catch (error) {
-                            console.error("Firebase authentication error:", error);
-                            showMessage('Authentication failed. Please try logging in again.', 'error');
-                            usernameSpan.textContent = 'Guest';
-                            guildListElement.innerHTML = '<li class="text-red-400 p-3">Authentication failed.</li>';
-                        }
-                    }
-                });
-            } else {
-                console.error("Firebase Auth not loaded. Cannot authenticate user.");
-                usernameSpan.textContent = 'Error: Auth Not Loaded';
-                guildListElement.innerHTML = '<li class="text-red-400 p-3">Authentication system not available.</li>';
-            }
-
+            // Directly fetch user data and bot guilds.
+            // The backend (server.js) will handle session authentication.
+            await fetchUserData();
+            await fetchBotGuilds();
 
             // --- Event Listeners ---
             // Navigation clicks
@@ -1344,32 +1310,48 @@
 
         /**
          * Fetches user data from the backend (PostgreSQL).
-         * Assumes an endpoint like `/api/user` that returns the logged-in user's details.
+         * Assumes an endpoint like `/user` that returns the logged-in user's details.
          */
         async function fetchUserData() {
             usernameSpan.textContent = 'Loading...';
             try {
                 const response = await fetch(`${BASE_URL}/user`); // Your server.js already has this endpoint
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // If not authenticated, server.js will redirect to '/', so no need to handle 401/403 here explicitly.
+                    // However, if it's a different error, we should log it.
+                    console.error(`HTTP error fetching user data! status: ${response.status}`);
+                    usernameSpan.textContent = 'Error Loading User';
+                    showMessage('Failed to load user data. You might not be authenticated. Redirecting to login...', 'error');
+                    // In a real scenario, if this fails, the backend should have already redirected.
+                    // But as a fallback for client-side errors:
+                    setTimeout(() => {
+                        window.location.href = '/'; // Redirect to login page
+                    }, 2000);
+                    return;
                 }
                 const userData = await response.json();
                 if (userData && userData.username) {
                     usernameSpan.textContent = userData.username; // Assuming 'username' field from Discord profile
                 } else {
                     usernameSpan.textContent = 'User Not Found';
-                    showMessage('User data not found on backend.', 'error');
+                    showMessage('User data not found on backend. Redirecting to login...', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/'; // Redirect to login page
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('Error fetching user data from backend:', error);
                 usernameSpan.textContent = 'Error Loading User';
-                showMessage('Failed to load user data. Please check backend connection.', 'error');
+                showMessage('Failed to load user data. Please check backend connection. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = '/'; // Redirect to login page
+                }, 2000);
             }
         }
 
         /**
          * Fetches guilds where the bot is present from the backend (PostgreSQL).
-         * Assumes an endpoint like `/api/bot-guilds` that returns a list of guilds.
+         * Assumes an endpoint like `/bot-guilds` that returns a list of guilds.
          */
         async function fetchBotGuilds() {
             guildListElement.innerHTML = '<li class="text-gray-400 p-3">Loading servers...</li>';
@@ -1593,9 +1575,9 @@
                 // Load Analytics Data
                 totalMembersSpan.textContent = mergedSettings.analytics.totalMembers.toLocaleString();
                 messages24hSpan.textContent = mergedSettings.analytics.messages24h.toLocaleString();
-                newMembers7dSpan.textContent = mergedSettings.analytics.newMembers7d.toLocaleString();
-                renderMemberGrowthChart(mergedSettings.analytics.labels, mergedSettings.analytics.memberGrowthData);
-                renderMessageActivityChart(mergedSettings.analytics.labels, mergedSettings.analytics.messageActivityData);
+                newMembers7dSpan.textContent = (mergedSettings.analytics.newMembers7d || 0).toLocaleString(); // Ensure it's not null/undefined
+                renderMemberGrowthChart(mergedSettings.analytics.labels || [], mergedSettings.analytics.memberGrowthData || []);
+                renderMessageActivityChart(mergedSettings.analytics.labels || [], mergedSettings.analytics.messageActivityData || []);
 
                 // Load Audit Log
                 currentAuditLogs = mergedSettings.auditLog; // Store the full log data
