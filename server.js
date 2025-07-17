@@ -112,6 +112,8 @@ async function initDatabase() {
             );
         `);
 
+        console.log(`[INFO] 'user_sessions' table exists check result: ${res.rows[0].exists}`);
+
         if (!res.rows[0].exists) {
             console.log("[INFO] 'user_sessions' table not found. Creating table...");
             await pgPool.query(`
