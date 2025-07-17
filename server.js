@@ -19,8 +19,8 @@ const PORT = 3000; // Explicitly set PORT to 3000
 // --- Discord OAuth2 Configuration ---
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'a_fallback_secret_if_not_set_in_env'; // IMPORTANT: Use a strong secret from .env
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://dashboard.melonvisuals.me/auth/discord/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'c4j9K!pZ@x7sQ_rVf8tYuB$eN%wX&aC*dF+gH-jK=lLmN~oP:qRsT<uV>wX?yZ[0123456789]{|}~'; // IMPORTANT: Use a strong secret from .env
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // Bot token for fetching bot's guilds
 const DATABASE_URL = process.env.DATABASE_URL; // NEW: PostgreSQL connection URL
 
