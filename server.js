@@ -47,6 +47,8 @@ if (!REDIS_URL) {
 console.log(`[DEBUG] NODE_ENV is: ${process.env.NODE_ENV}`);
 // Log a masked version of the session secret to confirm it's being picked up
 console.log(`[DEBUG] SESSION_SECRET (masked): ${SESSION_SECRET.substring(0, 5)}...${SESSION_SECRET.substring(SESSION_SECRET.length - 5)}`);
+// Log a masked version of the REDIS_URL to confirm what the app is seeing
+console.log(`[DEBUG] REDIS_URL (masked): ${REDIS_URL ? REDIS_URL.substring(0, 10) + '...' + REDIS_URL.substring(REDIS_URL.length - 5) : 'Not Set'}`);
 
 
 // Passport session setup.
@@ -108,6 +110,9 @@ if (REDIS_URL && REDIS_URL.startsWith('rediss://')) {
     };
     console.log("[DEBUG] Redis client configured for TLS with rejectUnauthorized: false.");
 } else {
+    // If REDIS_URL is not 'rediss://', we assume it's a non-TLS connection.
+    // The previous error was ECONNREFUSED, meaning it couldn't even reach the server.
+    // This log helps confirm if the URL is being interpreted as non-TLS.
     console.log("[DEBUG] Redis client configured for non-TLS connection (or REDIS_URL not set/invalid).");
 }
 
