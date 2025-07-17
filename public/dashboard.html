@@ -6,6 +6,7 @@
     <title>ZeroPoint Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Base Styles */
         body {
@@ -234,6 +235,36 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #4682B4; /* Steel Blue on hover */
         }
+        /* Embed Preview Specific Styles */
+        .embed-preview {
+            border: 1px solid #6b7280;
+            border-left: 5px solid var(--embed-color, #4299e1); /* Default blue */
+            padding: 1rem;
+            border-radius: 0.375rem;
+            background-color: #2c313a;
+            max-width: 400px; /* Limit embed preview width */
+        }
+        .embed-title {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .embed-description {
+            color: #cbd5e0;
+            margin-bottom: 0.5rem;
+        }
+        .embed-field-name {
+            font-weight: 500;
+            color: #fff;
+        }
+        .embed-field-value {
+            color: #cbd5e0;
+        }
+        .embed-footer {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body class="p-4">
@@ -338,6 +369,68 @@
                         <p id="ticketStatus" class="status-message text-sm mt-2"></p>
                     </div>
 
+                    <!-- Verification Settings Section (NEW) -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Verification System Settings</h3>
+                        <div class="mb-4">
+                            <label for="verificationChannelId" class="block text-gray-400 text-sm font-bold mb-2">Verification Channel ID:</label>
+                            <input type="text" id="verificationChannelId" class="input-field" placeholder="Enter verification channel ID">
+                        </div>
+                        <div class="mb-4">
+                            <label for="unverifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Unverified Role ID:</label>
+                            <input type="text" id="unverifiedRoleId" class="input-field" placeholder="Enter unverified role ID">
+                        </div>
+                        <div class="mb-4">
+                            <label for="verifiedRoleId" class="block text-gray-400 text-sm font-bold mb-2">Verified Role ID:</label>
+                            <input type="text" id="verifiedRoleId" class="input-field" placeholder="Enter verified role ID">
+                        </div>
+
+                        <h4 class="text-md font-semibold text-white mb-3 mt-6">Verification Message & Embed</h4>
+                        <div class="mb-4">
+                            <label for="verificationMessageContent" class="block text-gray-400 text-sm font-bold mb-2">Message Content (above embed):</label>
+                            <textarea id="verificationMessageContent" class="input-field h-24 resize-y" placeholder="Welcome {user}! Click the button below to verify."></textarea>
+                            <p class="text-sm text-gray-500 mt-1">Use `{user}` to mention the new member.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <h5 class="text-md font-medium text-white mb-2">Embed Builder</h5>
+                                <div class="mb-3">
+                                    <label for="embedTitle" class="block text-gray-400 text-sm font-bold mb-1">Title:</label>
+                                    <input type="text" id="embedTitle" class="input-field" placeholder="Verification Embed Title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="embedDescription" class="block text-gray-400 text-sm font-bold mb-1">Description:</label>
+                                    <textarea id="embedDescription" class="input-field h-24 resize-y" placeholder="Click the button to gain full access."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="embedColor" class="block text-gray-400 text-sm font-bold mb-1">Color (Hex):</label>
+                                    <input type="text" id="embedColor" class="input-field" placeholder="#2cb4e9">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="embedFooter" class="block text-gray-400 text-sm font-bold mb-1">Footer Text:</label>
+                                    <input type="text" id="embedFooter" class="input-field" placeholder="ZeroPoint | Verification">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="embedThumbnail" class="block text-gray-400 text-sm font-bold mb-1">Thumbnail URL:</label>
+                                    <input type="text" id="embedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="text-md font-medium text-white mb-2">Embed Preview</h5>
+                                <div id="embed-preview" class="embed-preview" style="--embed-color: #4299e1;">
+                                    <div class="embed-title" id="preview-embed-title">Verification Embed Title</div>
+                                    <div class="embed-description" id="preview-embed-description">Click the button to gain full access.</div>
+                                    <div class="embed-footer" id="preview-embed-footer">ZeroPoint | Verification</div>
+                                    <img id="preview-embed-thumbnail" src="" alt="Thumbnail Preview" class="mt-2 hidden w-16 h-16 object-cover rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                        <button id="saveVerificationSettings" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity mt-6">Save Verification Settings</button>
+                        <p id="verificationStatus" class="status-message text-sm mt-2"></p>
+                    </div>
+                    <!-- End Verification Settings Section -->
+
                     <!-- Advanced Settings & Integrations Card -->
                     <div class="card">
                         <h3 class="text-lg font-semibold mb-4 text-white">Advanced Settings</h3>
@@ -403,15 +496,25 @@
         const settingsContentDiv = document.getElementById('settingsContent');
         const noGuildSelectedDiv = document.getElementById('noGuildSelected');
 
-        // Settings input fields
+        // Navigation buttons
+        const navGeneral = document.getElementById('nav-general');
+        const navVerification = document.getElementById('nav-verification');
+
+        // Settings sections
+        const generalSettingsSection = document.getElementById('general-settings');
+        const verificationSettingsSection = document.getElementById('verification-settings');
+
+
+        // General settings elements
         const botPrefixInput = document.getElementById('botPrefix');
         const defaultRoleInput = document.getElementById('defaultRole');
+        const welcomeChannelInput = document.getElementById('welcomeChannel');
+        const farewellChannelInput = document.getElementById('farewell-channel-id'); // Corrected ID from previous HTML
+        const welcomeMessageInput = document.getElementById('welcomeMessage');
+        const welcomeDMCheckbox = document.getElementById('welcomeDM');
         const logChannelInput = document.getElementById('logChannel');
         const logMessagesCheckbox = document.getElementById('logMessages');
         const logChannelsCheckbox = document.getElementById('logChannels');
-        const welcomeChannelInput = document.getElementById('welcomeChannel');
-        const welcomeMessageInput = document.getElementById('welcomeMessage');
-        const welcomeDMCheckbox = document.getElementById('welcomeDM');
         const ticketCategoryInput = document.getElementById('ticketCategory');
         const ticketRoleInput = document.getElementById('ticketRole');
         const commandCooldownInput = document.getElementById('commandCooldown');
@@ -420,6 +523,21 @@
         const embedTitleInput = document.getElementById('embedTitle');
         const embedDescriptionInput = document.getElementById('embedDescription');
         const embedColorInput = document.getElementById('embedColor');
+        const embedFooterInput = document.getElementById('embedFooter'); // New
+        const embedThumbnailInput = document.getElementById('embedThumbnail'); // New
+
+        // Verification settings elements
+        const verificationChannelIdInput = document.getElementById('verificationChannelId');
+        const unverifiedRoleIdInput = document.getElementById('unverifiedRoleId');
+        const verifiedRoleIdInput = document.getElementById('verifiedRoleId');
+        const verificationMessageContentInput = document.getElementById('verificationMessageContent');
+        
+        // Embed preview elements
+        const embedPreview = document.getElementById('embed-preview');
+        const previewEmbedTitle = document.getElementById('preview-embed-title');
+        const previewEmbedDescription = document.getElementById('preview-embed-description');
+        const previewEmbedFooter = document.getElementById('preview-embed-footer');
+        const previewEmbedThumbnail = document.getElementById('preview-embed-thumbnail');
 
 
         // Save buttons and status messages
@@ -435,6 +553,8 @@
         const advancedStatusMsg = document.getElementById('advancedStatus');
         const sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
         const announcementStatusMsg = document.getElementById('announcementStatus');
+        const saveVerificationSettingsBtn = document.getElementById('saveVerificationSettings'); // New
+        const verificationStatusMsg = document.getElementById('verificationStatus'); // New
 
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -449,7 +569,18 @@
             saveLoggingSettingsBtn.addEventListener('click', () => saveSettings('logging'));
             saveTicketSettingsBtn.addEventListener('click', () => saveSettings('ticket'));
             saveAdvancedSettingsBtn.addEventListener('click', () => saveSettings('advanced'));
+            saveVerificationSettingsBtn.addEventListener('click', () => saveSettings('verification')); // New
             sendAnnouncementBtn.addEventListener('click', sendAnnouncement);
+
+            // Add event listeners for embed preview
+            embedTitleInput.addEventListener('input', updateEmbedPreview);
+            embedDescriptionInput.addEventListener('input', updateEmbedPreview);
+            embedColorInput.addEventListener('input', updateEmbedPreview);
+            embedFooterInput.addEventListener('input', updateEmbedPreview);
+            embedThumbnailInput.addEventListener('input', updateEmbedPreview);
+
+            // Initial section display
+            showSection('general-settings');
         });
 
         async function fetchUserData() {
@@ -554,6 +685,7 @@
                 },
                 welcome: {
                     welcomeChannel: '',
+                    farewellChannelId: '', // Added for consistency
                     welcomeMessage: `Welcome {user} to ${selectedGuildNameSpan.textContent}! Enjoy your stay.`,
                     sendWelcomeDM: false
                 },
@@ -566,6 +698,19 @@
                     ticketCategory: '',
                     ticketRole: ''
                 },
+                verification: { // NEW DUMMY DATA
+                    channelId: '',
+                    unverifiedRoleId: '',
+                    verifiedRoleId: '',
+                    messageContent: 'Welcome {user}! To gain access to the server, please click the "Verify" button below.',
+                    embed: {
+                        title: '✅ Server Verification',
+                        description: 'Please click the button below to verify your account and gain full access to the server. This helps us keep our community safe!',
+                        color: '#2cb4e9',
+                        footer: { text: 'ZeroPoint | Verification' },
+                        thumbnail: { url: 'https://melonvisuals.me/test/zeropoint.png' }
+                    }
+                },
                 advanced: {
                     commandCooldown: 5,
                     enableAI: false
@@ -575,27 +720,35 @@
             // Populate input fields with loaded settings
             botPrefixInput.value = dummySettings.general.botPrefix;
             defaultRoleInput.value = dummySettings.general.defaultRole;
+            welcomeChannelInput.value = dummySettings.welcome.welcomeChannel;
+            farewellChannelInput.value = dummySettings.welcome.farewellChannelId; // Populate farewell channel
+            welcomeMessageInput.value = dummySettings.welcome.welcomeMessage;
+            welcomeDMCheckbox.checked = dummySettings.welcome.sendWelcomeDM;
             logChannelInput.value = dummySettings.logging.logChannel;
             logMessagesCheckbox.checked = dummySettings.logging.logMessages;
             logChannelsCheckbox.checked = dummySettings.logging.logChannels;
-            welcomeChannelInput.value = dummySettings.welcome.welcomeChannel;
-            welcomeMessageInput.value = dummySettings.welcome.welcomeMessage;
-            welcomeDMCheckbox.checked = dummySettings.welcome.sendWelcomeDM;
             ticketCategoryInput.value = dummySettings.ticket.ticketCategory;
             ticketRoleInput.value = dummySettings.ticket.ticketRole;
             commandCooldownInput.value = dummySettings.advanced.commandCooldown;
             enableAICheckbox.checked = dummySettings.advanced.enableAI;
 
-            // Reset announcement builder fields on guild change
-            announcementChannelIdInput.value = '';
-            embedTitleInput.value = '';
-            embedDescriptionInput.value = '';
-            embedColorInput.value = '#5F9EA0'; // Default color
+            // Populate Verification Settings
+            verificationChannelIdInput.value = dummySettings.verification.channelId;
+            unverifiedRoleIdInput.value = dummySettings.verification.unverifiedRoleId;
+            verifiedRoleIdInput.value = dummySettings.verification.verifiedRoleId;
+            verificationMessageContentInput.value = dummySettings.verification.messageContent;
+            
+            // Populate Embed Builder fields for Verification
+            embedTitleInput.value = dummySettings.verification.embed.title;
+            embedDescriptionInput.value = dummySettings.verification.embed.description;
+            embedColorInput.value = dummySettings.verification.embed.color;
+            embedFooterInput.value = dummySettings.verification.embed.footer.text;
+            embedThumbnailInput.value = dummySettings.verification.embed.thumbnail.url;
+            updateEmbedPreview(); // Update preview after loading
         }
 
         async function saveSettings(settingType) {
             if (!selectedGuildId) {
-                // Using a simple alert for now, consider a custom modal in production
                 alert('Please select a guild first!');
                 return;
             }
@@ -607,13 +760,15 @@
             if (settingType === 'general') {
                 dataToSave = {
                     botPrefix: botPrefixInput.value,
-                    defaultRole: defaultRoleInput.value
+                    defaultRole: defaultRoleInput.value,
+                    welcomeChannelId: welcomeChannelInput.value, // Ensure welcome channel is saved with general settings
+                    farewellChannelId: farewellChannelIdInput.value // Ensure farewell channel is saved with general settings
                 };
                 statusMessageElement = generalStatusMsg;
                 saveButtonElement = saveGeneralSettingsBtn;
             } else if (settingType === 'welcome') {
+                // This block might become redundant if welcome settings are moved to general
                 dataToSave = {
-                    welcomeChannel: welcomeChannelInput.value,
                     welcomeMessage: welcomeMessageInput.value,
                     sendWelcomeDM: welcomeDMCheckbox.checked
                 };
@@ -634,6 +789,22 @@
                 };
                 statusMessageElement = ticketStatusMsg;
                 saveButtonElement = saveTicketSettingsBtn;
+            } else if (settingType === 'verification') { // NEW SAVE LOGIC
+                dataToSave = {
+                    channelId: verificationChannelIdInput.value,
+                    unverifiedRoleId: unverifiedRoleIdInput.value,
+                    verifiedRoleId: verifiedRoleIdInput.value,
+                    messageContent: verificationMessageContentInput.value,
+                    embed: {
+                        title: embedTitleInput.value,
+                        description: embedDescriptionInput.value,
+                        color: embedColorInput.value,
+                        footer: { text: embedFooterInput.value },
+                        thumbnail: { url: embedThumbnailInput.value }
+                    }
+                };
+                statusMessageElement = verificationStatusMsg;
+                saveButtonElement = saveVerificationSettingsBtn;
             } else if (settingType === 'advanced') {
                 dataToSave = {
                     commandCooldown: parseInt(commandCooldownInput.value, 10),
@@ -699,6 +870,9 @@
             const embedTitle = embedTitleInput.value.trim();
             const embedDescription = embedDescriptionInput.value.trim();
             const embedColor = embedColorInput.value.trim();
+            const embedFooterText = embedFooterInput.value.trim(); // New
+            const embedThumbnailUrl = embedThumbnailInput.value.trim(); // New
+
 
             if (!channelId || !embedTitle || !embedDescription) {
                 announcementStatusMsg.textContent = 'Please fill in all announcement fields (Channel ID, Title, Description).';
@@ -716,9 +890,13 @@
                 color: colorDecimal,
                 timestamp: new Date().toISOString(), // Current time
                 footer: {
-                    text: 'ZeroPoint Bot Announcement'
+                    text: embedFooterText || 'ZeroPoint Bot Announcement' // Use provided footer or default
                 }
             };
+
+            if (embedThumbnailUrl) {
+                embedData.thumbnail = { url: embedThumbnailUrl };
+            }
 
             // Disable button and show sending status
             sendAnnouncementBtn.disabled = true;
@@ -746,6 +924,8 @@
                 embedTitleInput.value = '';
                 embedDescriptionInput.value = '';
                 embedColorInput.value = '#5F9EA0';
+                embedFooterInput.value = '';
+                embedThumbnailInput.value = '';
 
             } catch (error) {
                 console.error('Error sending announcement:', error);
@@ -758,6 +938,52 @@
                 }, 3000);
             }
         }
+
+        // Function to update embed preview
+        function updateEmbedPreview() {
+            previewEmbedTitle.textContent = embedTitleInput.value || 'Verification Embed Title';
+            previewEmbedDescription.textContent = embedDescriptionInput.value || 'Click the button to gain full access.';
+            previewEmbedFooter.textContent = embedFooterInput.value || 'ZeroPoint | Verification';
+
+            let color = embedColorInput.value;
+            if (color && color.startsWith('#') && color.length === 7) {
+                embedPreview.style.setProperty('--embed-color', color);
+            } else {
+                embedPreview.style.setProperty('--embed-color', '#4299e1'); // Default blue
+            }
+
+            const thumbnailUrl = embedThumbnailInput.value;
+            if (thumbnailUrl) {
+                previewEmbedThumbnail.src = thumbnailUrl;
+                previewEmbedThumbnail.classList.remove('hidden');
+            } else {
+                previewEmbedThumbnail.src = '';
+                previewEmbedThumbnail.classList.add('hidden');
+            }
+        }
+
+        // Navigation Logic
+        function showSection(sectionId) {
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`nav-${sectionId.replace('-settings', '')}`).classList.add('active');
+        }
+
+        navGeneral.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('general-settings');
+        });
+
+        navVerification.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('verification-settings');
+        });
     </script>
 </body>
 </html>
