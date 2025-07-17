@@ -265,7 +265,7 @@ app.get('/', (req, res) => {
 // Start the server
 try {
     app.listen(PORT, () => {
-        console.log(`ZeroPoint Dashboard backend running on http://localhost:${PORT}`);
+        console.log(`ZeroPoint Dashboard backend running on http://dashboard.melonvisuals.me:${PORT}`);
         console.log(`Discord OAuth2 Redirect URI: ${REDIRECT_URI}`);
         console.log(`Session cookie 'secure' setting (based on REDIRECT_URI): ${REDIRECT_URI.startsWith('https://')}`);
     });
