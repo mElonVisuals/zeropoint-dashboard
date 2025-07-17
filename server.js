@@ -92,6 +92,9 @@ const pgPoolConfig = {
 // that the PostgreSQL server is not configured for SSL, so we should not request it.
 console.log("[DEBUG] PostgreSQL client configured for non-SSL connection (SSL options removed).");
 
+// Log the final pgPoolConfig before creating the pool
+console.log("[DEBUG] Final pgPoolConfig:", pgPoolConfig);
+
 
 const pgPool = new pg.Pool(pgPoolConfig);
 
