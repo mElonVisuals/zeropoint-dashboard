@@ -302,7 +302,7 @@
             <div id="settingsContent" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- General Settings Card -->
-                    <div class="card">
+                    <div id="general-settings" class="card settings-section">
                         <h3 class="text-lg font-semibold mb-4 text-white">General Settings</h3>
                         <div class="mb-4">
                             <label for="botPrefix" class="block text-gray-400 text-sm font-bold mb-2">Bot Prefix</label>
@@ -370,7 +370,7 @@
                     </div>
 
                     <!-- Verification Settings Section (NEW) -->
-                    <div class="card">
+                    <div id="verification-settings" class="card settings-section hidden">
                         <h3 class="text-lg font-semibold mb-4 text-white">Verification System Settings</h3>
                         <div class="mb-4">
                             <label for="verificationChannelId" class="block text-gray-400 text-sm font-bold mb-2">Verification Channel ID:</label>
@@ -396,33 +396,33 @@
                             <div>
                                 <h5 class="text-md font-medium text-white mb-2">Embed Builder</h5>
                                 <div class="mb-3">
-                                    <label for="embedTitle" class="block text-gray-400 text-sm font-bold mb-1">Title:</label>
-                                    <input type="text" id="embedTitle" class="input-field" placeholder="Verification Embed Title">
+                                    <label for="verificationEmbedTitle" class="block text-gray-400 text-sm font-bold mb-1">Title:</label>
+                                    <input type="text" id="verificationEmbedTitle" class="input-field" placeholder="Verification Embed Title">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="embedDescription" class="block text-gray-400 text-sm font-bold mb-1">Description:</label>
-                                    <textarea id="embedDescription" class="input-field h-24 resize-y" placeholder="Click the button to gain full access."></textarea>
+                                    <label for="verificationEmbedDescription" class="block text-gray-400 text-sm font-bold mb-1">Description:</label>
+                                    <textarea id="verificationEmbedDescription" class="input-field h-24 resize-y" placeholder="Click the button to gain full access."></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="embedColor" class="block text-gray-400 text-sm font-bold mb-1">Color (Hex):</label>
-                                    <input type="text" id="embedColor" class="input-field" placeholder="#2cb4e9">
+                                    <label for="verificationEmbedColor" class="block text-gray-400 text-sm font-bold mb-1">Color (Hex):</label>
+                                    <input type="text" id="verificationEmbedColor" class="input-field" placeholder="#2cb4e9">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="embedFooter" class="block text-gray-400 text-sm font-bold mb-1">Footer Text:</label>
-                                    <input type="text" id="embedFooter" class="input-field" placeholder="ZeroPoint | Verification">
+                                    <label for="verificationEmbedFooter" class="block text-gray-400 text-sm font-bold mb-1">Footer Text:</label>
+                                    <input type="text" id="verificationEmbedFooter" class="input-field" placeholder="ZeroPoint | Verification">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="embedThumbnail" class="block text-gray-400 text-sm font-bold mb-1">Thumbnail URL:</label>
-                                    <input type="text" id="embedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
+                                    <label for="verificationEmbedThumbnail" class="block text-gray-400 text-sm font-bold mb-1">Thumbnail URL:</label>
+                                    <input type="text" id="verificationEmbedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
                                 </div>
                             </div>
                             <div>
                                 <h5 class="text-md font-medium text-white mb-2">Embed Preview</h5>
-                                <div id="embed-preview" class="embed-preview" style="--embed-color: #4299e1;">
-                                    <div class="embed-title" id="preview-embed-title">Verification Embed Title</div>
-                                    <div class="embed-description" id="preview-embed-description">Click the button to gain full access.</div>
-                                    <div class="embed-footer" id="preview-embed-footer">ZeroPoint | Verification</div>
-                                    <img id="preview-embed-thumbnail" src="" alt="Thumbnail Preview" class="mt-2 hidden w-16 h-16 object-cover rounded-md">
+                                <div id="verification-embed-preview" class="embed-preview" style="--embed-color: #4299e1;">
+                                    <div class="embed-title" id="preview-verification-embed-title">Verification Embed Title</div>
+                                    <div class="embed-description" id="preview-verification-embed-description">Click the button to gain full access.</div>
+                                    <div class="embed-footer" id="preview-verification-embed-footer">ZeroPoint | Verification</div>
+                                    <img id="preview-verification-embed-thumbnail" src="" alt="Thumbnail Preview" class="mt-2 hidden w-16 h-16 object-cover rounded-md">
                                 </div>
                             </div>
                         </div>
@@ -454,16 +454,24 @@
                             <input type="text" id="announcementChannelId" class="input-field" placeholder="e.g., 123456789012345678">
                         </div>
                         <div class="mb-4">
-                            <label for="embedTitle" class="block text-gray-400 text-sm font-bold mb-2">Embed Title</label>
-                            <input type="text" id="embedTitle" class="input-field" placeholder="e.g., Important Update!">
+                            <label for="announcementEmbedTitle" class="block text-gray-400 text-sm font-bold mb-2">Embed Title</label>
+                            <input type="text" id="announcementEmbedTitle" class="input-field" placeholder="e.g., Important Update!">
                         </div>
                         <div class="mb-4">
-                            <label for="embedDescription" class="block text-gray-400 text-sm font-bold mb-2">Embed Description</label>
-                            <textarea id="embedDescription" class="input-field h-24 resize-y" placeholder="Details about the announcement..."></textarea>
+                            <label for="announcementEmbedDescription" class="block text-gray-400 text-sm font-bold mb-2">Embed Description</label>
+                            <textarea id="announcementEmbedDescription" class="input-field h-24 resize-y" placeholder="Details about the announcement..."></textarea>
                         </div>
                         <div class="mb-4">
-                            <label for="embedColor" class="block text-gray-400 text-sm font-bold mb-2">Embed Color (Hex Code)</label>
-                            <input type="text" id="embedColor" class="input-field" value="#5F9EA0" placeholder="e.g., #5F9EA0">
+                            <label for="announcementEmbedColor" class="block text-gray-400 text-sm font-bold mb-2">Embed Color (Hex Code)</label>
+                            <input type="text" id="announcementEmbedColor" class="input-field" value="#5F9EA0" placeholder="e.g., #5F9EA0">
+                        </div>
+                        <div class="mb-4">
+                            <label for="announcementEmbedFooter" class="block text-gray-400 text-sm font-bold mb-2">Embed Footer Text:</label>
+                            <input type="text" id="announcementEmbedFooter" class="input-field" placeholder="ZeroPoint Bot Announcement">
+                        </div>
+                        <div class="mb-4">
+                            <label for="announcementEmbedThumbnail" class="block text-gray-400 text-sm font-bold mb-2">Embed Thumbnail URL:</label>
+                            <input type="text" id="announcementEmbedThumbnail" class="input-field" placeholder="https://example.com/logo.png">
                         </div>
                         <button id="sendAnnouncementBtn" class="save-button accent-bg text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Send Announcement</button>
                         <p id="announcementStatus" class="status-message text-sm mt-2"></p>
@@ -488,76 +496,110 @@
         let botGuilds = [];
         let selectedGuildId = null;
 
-        // DOM Elements
-        const usernameSpan = document.getElementById('username');
-        const guildListElement = document.getElementById('guildList');
-        const guildsHeader = document.getElementById('guildsHeader');
-        const selectedGuildNameSpan = document.getElementById('selectedGuildName');
-        const settingsContentDiv = document.getElementById('settingsContent');
-        const noGuildSelectedDiv = document.getElementById('noGuildSelected');
-
-        // Navigation buttons
-        const navGeneral = document.getElementById('nav-general');
-        const navVerification = document.getElementById('nav-verification');
-
-        // Settings sections
-        const generalSettingsSection = document.getElementById('general-settings');
-        const verificationSettingsSection = document.getElementById('verification-settings');
-
-
-        // General settings elements
-        const botPrefixInput = document.getElementById('botPrefix');
-        const defaultRoleInput = document.getElementById('defaultRole');
-        const welcomeChannelInput = document.getElementById('welcomeChannel');
-        const farewellChannelInput = document.getElementById('farewell-channel-id'); // Corrected ID from previous HTML
-        const welcomeMessageInput = document.getElementById('welcomeMessage');
-        const welcomeDMCheckbox = document.getElementById('welcomeDM');
-        const logChannelInput = document.getElementById('logChannel');
-        const logMessagesCheckbox = document.getElementById('logMessages');
-        const logChannelsCheckbox = document.getElementById('logChannels');
-        const ticketCategoryInput = document.getElementById('ticketCategory');
-        const ticketRoleInput = document.getElementById('ticketRole');
-        const commandCooldownInput = document.getElementById('commandCooldown');
-        const enableAICheckbox = document.getElementById('enableAI');
-        const announcementChannelIdInput = document.getElementById('announcementChannelId');
-        const embedTitleInput = document.getElementById('embedTitle');
-        const embedDescriptionInput = document.getElementById('embedDescription');
-        const embedColorInput = document.getElementById('embedColor');
-        const embedFooterInput = document.getElementById('embedFooter'); // New
-        const embedThumbnailInput = document.getElementById('embedThumbnail'); // New
+        // DOM Elements - Declared here, assigned inside DOMContentLoaded
+        let usernameSpan, guildListElement, guildsHeader, selectedGuildNameSpan, settingsContentDiv, noGuildSelectedDiv;
+        let navGeneral, navVerification;
+        let generalSettingsSection, verificationSettingsSection;
+        let botPrefixInput, defaultRoleInput, welcomeChannelInput, farewellChannelInput, welcomeMessageInput, welcomeDMCheckbox;
+        let logChannelInput, logMessagesCheckbox, logChannelsCheckbox;
+        let ticketCategoryInput, ticketRoleInput;
+        let commandCooldownInput, enableAICheckbox;
+        let announcementChannelIdInput, announcementEmbedTitleInput, announcementEmbedDescriptionInput, announcementEmbedColorInput, announcementEmbedFooterInput, announcementEmbedThumbnailInput;
 
         // Verification settings elements
-        const verificationChannelIdInput = document.getElementById('verificationChannelId');
-        const unverifiedRoleIdInput = document.getElementById('unverifiedRoleId');
-        const verifiedRoleIdInput = document.getElementById('verifiedRoleId');
-        const verificationMessageContentInput = document.getElementById('verificationMessageContent');
+        let verificationChannelIdInput, unverifiedRoleIdInput, verifiedRoleIdInput, verificationMessageContentInput;
+        let verificationEmbedTitleInput, verificationEmbedDescriptionInput, verificationEmbedColorInput, verificationEmbedFooterInput, verificationEmbedThumbnailInput;
         
-        // Embed preview elements
-        const embedPreview = document.getElementById('embed-preview');
-        const previewEmbedTitle = document.getElementById('preview-embed-title');
-        const previewEmbedDescription = document.getElementById('preview-embed-description');
-        const previewEmbedFooter = document.getElementById('preview-embed-footer');
-        const previewEmbedThumbnail = document.getElementById('preview-embed-thumbnail');
+        // Embed preview elements for Verification
+        let verificationEmbedPreview, previewVerificationEmbedTitle, previewVerificationEmbedDescription, previewVerificationEmbedFooter, previewVerificationEmbedThumbnail;
+        // Embed preview elements for Announcement
+        let announcementEmbedPreview, previewAnnouncementEmbedTitle, previewAnnouncementEmbedDescription, previewAnnouncementEmbedFooter, previewAnnouncementEmbedThumbnail;
 
 
         // Save buttons and status messages
-        const saveGeneralSettingsBtn = document.getElementById('saveGeneralSettings');
-        const generalStatusMsg = document.getElementById('generalStatus');
-        const saveWelcomeSettingsBtn = document.getElementById('saveWelcomeSettings');
-        const welcomeStatusMsg = document.getElementById('welcomeStatus');
-        const saveLoggingSettingsBtn = document.getElementById('saveLoggingSettings');
-        const loggingStatusMsg = document.getElementById('loggingStatus');
-        const saveTicketSettingsBtn = document.getElementById('saveTicketSettings');
-        const ticketStatusMsg = document.getElementById('ticketStatus');
-        const saveAdvancedSettingsBtn = document.getElementById('saveAdvancedSettings');
-        const advancedStatusMsg = document.getElementById('advancedStatus');
-        const sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
-        const announcementStatusMsg = document.getElementById('announcementStatus');
-        const saveVerificationSettingsBtn = document.getElementById('saveVerificationSettings'); // New
-        const verificationStatusMsg = document.getElementById('verificationStatus'); // New
+        let saveGeneralSettingsBtn, generalStatusMsg;
+        let saveWelcomeSettingsBtn, welcomeStatusMsg;
+        let saveLoggingSettingsBtn, loggingStatusMsg;
+        let saveTicketSettingsBtn, ticketStatusMsg;
+        let saveAdvancedSettingsBtn, advancedStatusMsg;
+        let sendAnnouncementBtn, announcementStatusMsg;
+        let saveVerificationSettingsBtn, verificationStatusMsg;
 
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Assign DOM Elements inside DOMContentLoaded
+            usernameSpan = document.getElementById('username');
+            guildListElement = document.getElementById('guildList');
+            guildsHeader = document.getElementById('guildsHeader');
+            selectedGuildNameSpan = document.getElementById('selectedGuildName');
+            settingsContentDiv = document.getElementById('settingsContent');
+            noGuildSelectedDiv = document.getElementById('noGuildSelected');
+
+            navGeneral = document.getElementById('nav-general');
+            navVerification = document.getElementById('nav-verification');
+
+            generalSettingsSection = document.getElementById('general-settings');
+            verificationSettingsSection = document.getElementById('verification-settings');
+
+            botPrefixInput = document.getElementById('botPrefix');
+            defaultRoleInput = document.getElementById('defaultRole');
+            welcomeChannelInput = document.getElementById('welcomeChannel');
+            farewellChannelInput = document.getElementById('farewell-channel-id');
+            welcomeMessageInput = document.getElementById('welcomeMessage');
+            welcomeDMCheckbox = document.getElementById('welcomeDM');
+            logChannelInput = document.getElementById('logChannel');
+            logMessagesCheckbox = document.getElementById('logMessages');
+            logChannelsCheckbox = document.getElementById('logChannels');
+            ticketCategoryInput = document.getElementById('ticketCategory');
+            ticketRoleInput = document.getElementById('ticketRole');
+            commandCooldownInput = document.getElementById('commandCooldown');
+            enableAICheckbox = document.getElementById('enableAI');
+            announcementChannelIdInput = document.getElementById('announcementChannelId');
+            announcementEmbedTitleInput = document.getElementById('announcementEmbedTitle'); // Corrected ID
+            announcementEmbedDescriptionInput = document.getElementById('announcementEmbedDescription'); // Corrected ID
+            announcementEmbedColorInput = document.getElementById('announcementEmbedColor'); // Corrected ID
+            announcementEmbedFooterInput = document.getElementById('announcementEmbedFooter'); // Corrected ID
+            announcementEmbedThumbnailInput = document.getElementById('announcementEmbedThumbnail'); // Corrected ID
+
+            verificationChannelIdInput = document.getElementById('verificationChannelId');
+            unverifiedRoleIdInput = document.getElementById('unverifiedRoleId');
+            verifiedRoleIdInput = document.getElementById('verifiedRoleId');
+            verificationMessageContentInput = document.getElementById('verificationMessageContent');
+            verificationEmbedTitleInput = document.getElementById('verificationEmbedTitle');
+            verificationEmbedDescriptionInput = document.getElementById('verificationEmbedDescription');
+            verificationEmbedColorInput = document.getElementById('verificationEmbedColor');
+            verificationEmbedFooterInput = document.getElementById('verificationEmbedFooter');
+            verificationEmbedThumbnailInput = document.getElementById('verificationEmbedThumbnail');
+            
+            verificationEmbedPreview = document.getElementById('verification-embed-preview');
+            previewVerificationEmbedTitle = document.getElementById('preview-verification-embed-title');
+            previewVerificationEmbedDescription = document.getElementById('preview-verification-embed-description');
+            previewVerificationEmbedFooter = document.getElementById('preview-verification-embed-footer');
+            previewVerificationEmbedThumbnail = document.getElementById('preview-verification-embed-thumbnail');
+
+            announcementEmbedPreview = document.getElementById('announcement-embed-preview'); // New ID for announcement preview
+            previewAnnouncementEmbedTitle = document.getElementById('preview-announcement-embed-title'); // New ID
+            previewAnnouncementEmbedDescription = document.getElementById('preview-announcement-embed-description'); // New ID
+            previewAnnouncementEmbedFooter = document.getElementById('preview-announcement-embed-footer'); // New ID
+            previewAnnouncementEmbedThumbnail = document.getElementById('preview-announcement-embed-thumbnail'); // New ID
+
+
+            saveGeneralSettingsBtn = document.getElementById('saveGeneralSettings');
+            generalStatusMsg = document.getElementById('generalStatus');
+            saveWelcomeSettingsBtn = document.getElementById('saveWelcomeSettings');
+            welcomeStatusMsg = document.getElementById('welcomeStatus');
+            saveLoggingSettingsBtn = document.getElementById('saveLoggingSettings');
+            loggingStatusMsg = document.getElementById('loggingStatus');
+            saveTicketSettingsBtn = document.getElementById('saveTicketSettings');
+            ticketStatusMsg = document.getElementById('ticketStatus');
+            saveAdvancedSettingsBtn = document.getElementById('saveAdvancedSettings');
+            advancedStatusMsg = document.getElementById('advancedStatus');
+            sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
+            announcementStatusMsg = document.getElementById('announcementStatus');
+            saveVerificationSettingsBtn = document.getElementById('saveVerificationSettings');
+            verificationStatusMsg = document.getElementById('verificationStatus');
+
+
             document.getElementById('current-year').textContent = new Date().getFullYear();
             await fetchUserData();
             await fetchBotGuilds();
@@ -569,15 +611,22 @@
             saveLoggingSettingsBtn.addEventListener('click', () => saveSettings('logging'));
             saveTicketSettingsBtn.addEventListener('click', () => saveSettings('ticket'));
             saveAdvancedSettingsBtn.addEventListener('click', () => saveSettings('advanced'));
-            saveVerificationSettingsBtn.addEventListener('click', () => saveSettings('verification')); // New
+            saveVerificationSettingsBtn.addEventListener('click', () => saveSettings('verification'));
             sendAnnouncementBtn.addEventListener('click', sendAnnouncement);
 
-            // Add event listeners for embed preview
-            embedTitleInput.addEventListener('input', updateEmbedPreview);
-            embedDescriptionInput.addEventListener('input', updateEmbedPreview);
-            embedColorInput.addEventListener('input', updateEmbedPreview);
-            embedFooterInput.addEventListener('input', updateEmbedPreview);
-            embedThumbnailInput.addEventListener('input', updateEmbedPreview);
+            // Add event listeners for verification embed preview
+            verificationEmbedTitleInput.addEventListener('input', updateVerificationEmbedPreview);
+            verificationEmbedDescriptionInput.addEventListener('input', updateVerificationEmbedPreview);
+            verificationEmbedColorInput.addEventListener('input', updateVerificationEmbedPreview);
+            verificationEmbedFooterInput.addEventListener('input', updateVerificationEmbedPreview);
+            verificationEmbedThumbnailInput.addEventListener('input', updateVerificationEmbedPreview);
+
+            // Add event listeners for announcement embed preview
+            announcementEmbedTitleInput.addEventListener('input', updateAnnouncementEmbedPreview);
+            announcementEmbedDescriptionInput.addEventListener('input', updateAnnouncementEmbedPreview);
+            announcementEmbedColorInput.addEventListener('input', updateAnnouncementEmbedPreview);
+            announcementEmbedFooterInput.addEventListener('input', updateAnnouncementEmbedPreview);
+            announcementEmbedThumbnailInput.addEventListener('input', updateAnnouncementEmbedPreview);
 
             // Initial section display
             showSection('general-settings');
@@ -739,12 +788,21 @@
             verificationMessageContentInput.value = dummySettings.verification.messageContent;
             
             // Populate Embed Builder fields for Verification
-            embedTitleInput.value = dummySettings.verification.embed.title;
-            embedDescriptionInput.value = dummySettings.verification.embed.description;
-            embedColorInput.value = dummySettings.verification.embed.color;
-            embedFooterInput.value = dummySettings.verification.embed.footer.text;
-            embedThumbnailInput.value = dummySettings.verification.embed.thumbnail.url;
-            updateEmbedPreview(); // Update preview after loading
+            verificationEmbedTitleInput.value = dummySettings.verification.embed.title;
+            verificationEmbedDescriptionInput.value = dummySettings.verification.embed.description;
+            verificationEmbedColorInput.value = dummySettings.verification.embed.color;
+            verificationEmbedFooterInput.value = dummySettings.verification.embed.footer.text;
+            verificationEmbedThumbnailInput.value = dummySettings.verification.embed.thumbnail.url;
+            updateVerificationEmbedPreview(); // Update preview after loading
+
+            // Clear Announcement Builder fields on guild change
+            announcementChannelIdInput.value = '';
+            announcementEmbedTitleInput.value = '';
+            announcementEmbedDescriptionInput.value = '';
+            announcementEmbedColorInput.value = '#5F9EA0'; // Default color
+            announcementEmbedFooterInput.value = '';
+            announcementEmbedThumbnailInput.value = '';
+            updateAnnouncementEmbedPreview(); // Clear announcement preview
         }
 
         async function saveSettings(settingType) {
@@ -762,7 +820,7 @@
                     botPrefix: botPrefixInput.value,
                     defaultRole: defaultRoleInput.value,
                     welcomeChannelId: welcomeChannelInput.value, // Ensure welcome channel is saved with general settings
-                    farewellChannelId: farewellChannelIdInput.value // Ensure farewell channel is saved with general settings
+                    farewellChannelId: farewellChannelInput.value // Ensure farewell channel is saved with general settings
                 };
                 statusMessageElement = generalStatusMsg;
                 saveButtonElement = saveGeneralSettingsBtn;
@@ -796,11 +854,11 @@
                     verifiedRoleId: verifiedRoleIdInput.value,
                     messageContent: verificationMessageContentInput.value,
                     embed: {
-                        title: embedTitleInput.value,
-                        description: embedDescriptionInput.value,
-                        color: embedColorInput.value,
-                        footer: { text: embedFooterInput.value },
-                        thumbnail: { url: embedThumbnailInput.value }
+                        title: verificationEmbedTitleInput.value,
+                        description: verificationEmbedDescriptionInput.value,
+                        color: verificationEmbedColorInput.value,
+                        footer: { text: verificationEmbedFooterInput.value },
+                        thumbnail: { url: verificationEmbedThumbnailInput.value }
                     }
                 };
                 statusMessageElement = verificationStatusMsg;
@@ -867,11 +925,11 @@
             }
 
             const channelId = announcementChannelIdInput.value.trim();
-            const embedTitle = embedTitleInput.value.trim();
-            const embedDescription = embedDescriptionInput.value.trim();
-            const embedColor = embedColorInput.value.trim();
-            const embedFooterText = embedFooterInput.value.trim(); // New
-            const embedThumbnailUrl = embedThumbnailInput.value.trim(); // New
+            const embedTitle = announcementEmbedTitleInput.value.trim(); // Corrected reference
+            const embedDescription = announcementEmbedDescriptionInput.value.trim(); // Corrected reference
+            const embedColor = announcementEmbedColorInput.value.trim(); // Corrected reference
+            const embedFooterText = announcementEmbedFooterInput.value.trim(); // Corrected reference
+            const embedThumbnailUrl = announcementEmbedThumbnailInput.value.trim(); // Corrected reference
 
 
             if (!channelId || !embedTitle || !embedDescription) {
@@ -921,11 +979,12 @@
 
                 // Clear fields after successful send
                 announcementChannelIdInput.value = '';
-                embedTitleInput.value = '';
-                embedDescriptionInput.value = '';
-                embedColorInput.value = '#5F9EA0';
-                embedFooterInput.value = '';
-                embedThumbnailInput.value = '';
+                announcementEmbedTitleInput.value = '';
+                announcementEmbedDescriptionInput.value = '';
+                announcementEmbedColorInput.value = '#5F9EA0';
+                announcementEmbedFooterInput.value = '';
+                announcementEmbedThumbnailInput.value = '';
+                updateAnnouncementEmbedPreview(); // Clear announcement preview
 
             } catch (error) {
                 console.error('Error sending announcement:', error);
@@ -939,26 +998,49 @@
             }
         }
 
-        // Function to update embed preview
-        function updateEmbedPreview() {
-            previewEmbedTitle.textContent = embedTitleInput.value || 'Verification Embed Title';
-            previewEmbedDescription.textContent = embedDescriptionInput.value || 'Click the button to gain full access.';
-            previewEmbedFooter.textContent = embedFooterInput.value || 'ZeroPoint | Verification';
+        // Function to update verification embed preview
+        function updateVerificationEmbedPreview() {
+            previewVerificationEmbedTitle.textContent = verificationEmbedTitleInput.value || 'Verification Embed Title';
+            previewVerificationEmbedDescription.textContent = verificationEmbedDescriptionInput.value || 'Click the button to gain full access.';
+            previewVerificationEmbedFooter.textContent = verificationEmbedFooterInput.value || 'ZeroPoint | Verification';
 
-            let color = embedColorInput.value;
+            let color = verificationEmbedColorInput.value;
             if (color && color.startsWith('#') && color.length === 7) {
-                embedPreview.style.setProperty('--embed-color', color);
+                verificationEmbedPreview.style.setProperty('--embed-color', color);
             } else {
-                embedPreview.style.setProperty('--embed-color', '#4299e1'); // Default blue
+                verificationEmbedPreview.style.setProperty('--embed-color', '#4299e1'); // Default blue
             }
 
-            const thumbnailUrl = embedThumbnailInput.value;
+            const thumbnailUrl = verificationEmbedThumbnailInput.value;
             if (thumbnailUrl) {
-                previewEmbedThumbnail.src = thumbnailUrl;
-                previewEmbedThumbnail.classList.remove('hidden');
+                previewVerificationEmbedThumbnail.src = thumbnailUrl;
+                previewVerificationEmbedThumbnail.classList.remove('hidden');
             } else {
-                previewEmbedThumbnail.src = '';
-                previewEmbedThumbnail.classList.add('hidden');
+                previewVerificationEmbedThumbnail.src = '';
+                previewVerificationEmbedThumbnail.classList.add('hidden');
+            }
+        }
+
+        // Function to update announcement embed preview
+        function updateAnnouncementEmbedPreview() {
+            previewAnnouncementEmbedTitle.textContent = announcementEmbedTitleInput.value || 'Important Update!';
+            previewAnnouncementEmbedDescription.textContent = announcementEmbedDescriptionInput.value || 'Details about the announcement...';
+            previewAnnouncementEmbedFooter.textContent = announcementEmbedFooterInput.value || 'ZeroPoint Bot Announcement';
+
+            let color = announcementEmbedColorInput.value;
+            if (color && color.startsWith('#') && color.length === 7) {
+                announcementEmbedPreview.style.setProperty('--embed-color', color);
+            } else {
+                announcementEmbedPreview.style.setProperty('--embed-color', '#5F9EA0'); // Default color for announcement
+            }
+
+            const thumbnailUrl = announcementEmbedThumbnailInput.value;
+            if (thumbnailUrl) {
+                previewAnnouncementEmbedThumbnail.src = thumbnailUrl;
+                previewAnnouncementEmbedThumbnail.classList.remove('hidden');
+            } else {
+                previewAnnouncementEmbedThumbnail.src = '';
+                previewAnnouncementEmbedThumbnail.classList.add('hidden');
             }
         }
 
@@ -972,18 +1054,34 @@
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.getElementById(`nav-${sectionId.replace('-settings', '')}`).classList.add('active');
+            // Ensure the correct navigation item is activated
+            const navItemId = `nav-${sectionId.replace('-settings', '')}`;
+            const navItem = document.getElementById(navItemId);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
         }
 
-        navGeneral.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection('general-settings');
-        });
+        // Initial navigation setup (moved from top of file to ensure elements exist)
+        // This part needs to be in the HTML to be clickable, but the JS listeners need to be assigned after DOMContentLoaded
+        // The HTML already has the sidebar structure, so we just need to ensure the listeners are correct.
+        // The original HTML had a simple `<a>` tag with `id="nav-general"` and `id="nav-verification"`.
+        // The `showSection` function already handles adding/removing 'hidden' and 'active' classes.
 
-        navVerification.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection('verification-settings');
-        });
+        // Event listeners for sidebar navigation (already present in original code, just ensuring they are inside DOMContentLoaded)
+        if (navGeneral) {
+            navGeneral.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('general-settings');
+            });
+        }
+
+        if (navVerification) {
+            navVerification.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('verification-settings');
+            });
+        }
     </script>
 </body>
 </html>
