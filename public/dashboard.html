@@ -11,7 +11,7 @@
         /* Base Styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A; /* Deepest dark background, matching index.html */
+            background-color: #0A0A0A; /* Deepest dark background */
             color: #EAEAEA; /* Light text */
             min-height: 100vh;
             display: flex;
@@ -21,7 +21,7 @@
             z-index: 1;
         }
 
-        /* Animated Background Gradients (from index.html) */
+        /* Animated Background Gradients */
         .background-gradient-top {
             position: fixed;
             top: 0;
@@ -58,7 +58,7 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* Subtle Noise Overlay (from index.html) */
+        /* Subtle Noise Overlay */
         body::before {
             content: '';
             position: fixed;
@@ -73,7 +73,7 @@
             pointer-events: none;
         }
 
-        /* Starfield Effect (from index.html) */
+        /* Starfield Effect */
         .starfield {
             position: fixed;
             top: 0;
@@ -121,25 +121,42 @@
             100% { transform: translate(0, 0); opacity: 1; }
         }
 
-        /* Main Container Background & Border */
-        .container-bg {
-            background-color: #1A1A1A; /* Darker background for cards, matching index.html card */
-            border: 1px solid #3A3A3A; /* Subtle border */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+        /* Glassmorphism Effect for Containers and Cards */
+        .glass-container {
+            background-color: rgba(26, 26, 26, 0.6); /* Slightly transparent dark background */
+            border: 1px solid rgba(58, 58, 58, 0.4); /* Transparent border */
+            backdrop-filter: blur(10px); /* Glassmorphism blur */
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Softer, deeper shadow */
+            transition: all 0.3s ease-in-out;
         }
+        .glass-container:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            border-color: rgba(95, 158, 160, 0.6); /* Accent border on hover */
+        }
+
         /* Header Background */
         header {
-            background-color: #1A1A1A; /* Darker header background */
-            border-bottom: 1px solid #3A3A3A; /* Subtle border */
+            background-color: rgba(26, 26, 26, 0.8); /* More opaque for header */
+            border-bottom: 1px solid rgba(58, 58, 58, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
+
         /* Logout Button */
         .btn-logout {
             background-color: #DC2626; /* Red-600 */
             transition: background-color 0.3s ease;
+            border-radius: 0.5rem; /* Rounded corners */
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
         }
         .btn-logout:hover {
             background-color: #B91C1C; /* Red-700 */
+            transform: translateY(-1px);
         }
+
         /* Accent Colors */
         .accent-color {
             color: #5F9EA0; /* Cadet Blue */
@@ -150,62 +167,81 @@
         .accent-border {
             border-color: #5F9EA0;
         }
-        /* Card Styling for settings sections */
+
+        /* Card Styling for settings sections (inherits glass-container) */
         .card {
-            background-color: #0A0A0A; /* Even darker card background */
-            border: 1px solid #3A3A3A;
-            border-radius: 0.5rem;
+            background-color: rgba(10, 10, 10, 0.7); /* Slightly darker transparent for cards */
+            border: 1px solid rgba(58, 58, 58, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 0.75rem; /* More rounded */
             padding: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border-color: rgba(95, 158, 160, 0.5); /* Accent border on hover */
         }
+
         /* Input Fields */
         .input-field {
-            background-color: #282828; /* Darker input field */
-            border: 1px solid #555;
+            background-color: rgba(40, 40, 40, 0.7); /* Transparent dark for inputs */
+            border: 1px solid rgba(85, 85, 85, 0.5);
             color: #EAEAEA;
             padding: 0.75rem;
-            border-radius: 0.375rem;
+            border-radius: 0.5rem; /* More rounded */
             width: 100%;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .input-field:focus {
             outline: none;
             border-color: #5F9EA0;
-            box-shadow: 0 0 0 2px rgba(95, 158, 160, 0.5);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.4); /* Wider, softer focus glow */
         }
+
         /* Guild Card in Sidebar */
         .guild-card {
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-            border: 1px solid transparent; /* Default transparent border */
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            background-color: rgba(40, 40, 40, 0.5); /* Transparent dark for guild cards */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 0.6rem;
         }
         .guild-card:hover {
-            transform: translateY(-3px);
-            background-color: #3A3A3A;
+            transform: translateY(-2px);
+            background-color: rgba(58, 58, 58, 0.6);
+            border-color: rgba(95, 158, 160, 0.3);
         }
         .guild-card.selected {
-            background-color: #4A4A4A;
+            background-color: rgba(74, 74, 74, 0.7);
             border-color: #5F9EA0; /* Accent border for selected */
             box-shadow: 0 0 0 2px rgba(95, 158, 160, 0.5);
         }
+
         /* Save Button */
         .save-button {
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .save-button:hover {
-            transform: translateY(-1px);
-            opacity: 0.9;
+            transform: translateY(-2px);
+            opacity: 0.95;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         .save-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: translateY(0);
+            box-shadow: none;
         }
+
         /* Status Message */
         .status-message {
             opacity: 0;
@@ -220,6 +256,7 @@
         .status-error {
             color: #F44336; /* Red */
         }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -235,14 +272,18 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #4682B4; /* Steel Blue on hover */
         }
+
         /* Embed Preview Specific Styles */
         .embed-preview {
-            border: 1px solid #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.5); /* Lighter, transparent border */
             border-left: 5px solid var(--embed-color, #4299e1); /* Default blue */
             padding: 1rem;
-            border-radius: 0.375rem;
-            background-color: #2c313a;
-            max-width: 400px; /* Limit embed preview width */
+            border-radius: 0.5rem; /* More rounded */
+            background-color: rgba(44, 49, 58, 0.8); /* Transparent dark for embed preview */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .embed-title {
             font-weight: 600;
@@ -272,7 +313,7 @@
     <div class="background-gradient-bottom"></div>
     <div class="starfield"></div>
 
-    <header class="w-full bg-[#1A1A1A] p-4 shadow-md flex justify-between items-center z-10">
+    <header class="w-full p-4 shadow-md flex justify-between items-center z-10">
         <div class="flex items-center">
             <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Logo" class="w-10 h-10 rounded-full mr-3">
             <h1 class="text-2xl font-bold text-white">ZeroPoint Dashboard</h1>
@@ -285,7 +326,7 @@
 
     <main class="flex-1 flex flex-col md:flex-row p-6 gap-6 max-w-7xl mx-auto w-full relative z-10">
         <!-- Guild Selection Sidebar -->
-        <aside class="w-full md:w-1/4 bg-[#1A1A1A] p-4 rounded-lg shadow-lg container-bg h-full overflow-y-auto">
+        <aside class="w-full md:w-1/4 p-4 rounded-lg shadow-lg glass-container h-full overflow-y-auto">
             <h2 class="text-xl font-semibold mb-4 text-white">Your Servers</h2>
             <p class="text-gray-400 text-sm mb-4">Select a server to manage bot settings.</p>
             <p id="guildsHeader" class="text-gray-300 mt-4 hidden">Your Guilds (where bot is present):</p>
@@ -296,7 +337,7 @@
         </aside>
 
         <!-- Main Content Area (Dashboard Settings) -->
-        <section class="flex-1 bg-[#1A1A1A] p-6 rounded-lg shadow-lg container-bg">
+        <section class="flex-1 p-6 rounded-lg shadow-lg glass-container">
             <h2 class="text-xl font-semibold mb-6 text-white">Bot Settings for <span id="selectedGuildName" class="accent-color">No Server Selected</span></h2>
 
             <div id="settingsContent" class="hidden">
