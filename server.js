@@ -87,18 +87,10 @@ const pgPoolConfig = {
     connectionString: DATABASE_URL,
 };
 
-// Always include SSL options if the DATABASE_URL starts with 'postgres' (indicating a PostgreSQL connection)
-// This is crucial for many cloud-hosted or internal Coolify PostgreSQL instances that enforce SSL.
-// rejectUnauthorized: false is used for self-signed certificates common in internal networks.
-if (DATABASE_URL && DATABASE_URL.startsWith('postgres')) {
-    pgPoolConfig.ssl = {
-        rejectUnauthorized: false // WARNING: Use this only if you trust the PostgreSQL server and its network.
-                                  // In production with a public PostgreSQL, you'd typically use a CA certificate.
-    };
-    console.log("[DEBUG] PostgreSQL client configured for SSL with rejectUnauthorized: false.");
-} else {
-    console.log("[DEBUG] PostgreSQL client configured for non-SSL connection (or DATABASE_URL not set/invalid).");
-}
+// Removed the SSL configuration block.
+// The error "The server does not support SSL connections" indicates
+// that the PostgreSQL server is not configured for SSL, so we should not request it.
+console.log("[DEBUG] PostgreSQL client configured for non-SSL connection (SSL options removed).");
 
 
 const pgPool = new pg.Pool(pgPoolConfig);
