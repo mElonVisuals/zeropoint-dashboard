@@ -99,14 +99,14 @@ pgPool.on('error', (err) => console.error('❌ PostgreSQL Pool Error', err.messa
 
 /**
  * Initializes the database by checking if the 'user_sessions' table exists.
- * If not, it creates the table with the required schema.
+ * If not, it creates the table with the required schema, now using TIMESTAMP WITH TIME ZONE.
  *
  * NOTE: If you continue to see "operator does not exist: bigint >= timestamp with time zone" errors
  * even after deploying this code, it means the 'user_sessions' table in your database
- * still has an incorrect schema (e.g., 'expire' is TIMESTAMP WITH TIME ZONE).
+ * still has an incorrect schema (e.g., 'expire' is BIGINT).
  * In such cases, you MUST manually drop the 'user_sessions' table in your PostgreSQL database
  * (e.g., using `DROP TABLE IF EXISTS user_sessions;`) and then redeploy your application.
- * This will allow this function to recreate it with the correct 'BIGINT' type for 'expire'.
+ * This will allow this function to recreate it with the correct 'TIMESTAMP WITH TIME ZONE' type for 'expire'.
  */
 async function initDatabase() {
     try {
@@ -122,17 +122,30 @@ async function initDatabase() {
         console.log(`[INFO] 'user_sessions' table exists check result: ${res.rows[0].exists}`);
 
         if (!res.rows[0].exists) {
-            console.log("[INFO] 'user_sessions' table not found. Creating table...");
+            console.log("[INFO] 'user_sessions' table not found. Creating table with TIMESTAMP WITH TIME ZONE for expire...");
             await pgPool.query(`
                 CREATE TABLE user_sessions (
                   sid VARCHAR(255) NOT NULL PRIMARY KEY,
                   sess JSONB NOT NULL,
-                  expire BIGINT NOT NULL
+                  expire TIMESTAMP WITH TIME ZONE NOT NULL
                 );
             `);
-            console.log("✅ 'user_sessions' table created successfully!");
+            console.log("✅ 'user_sessions' table created successfully with TIMESTAMP WITH TIME ZONE!");
         } else {
-            console.log("✅ 'user_sessions' table already exists.");
+            console.log("✅ 'user_sessions' table already exists. Verifying schema for 'expire' column...");
+            // Optional: Add a more robust schema check here if needed, but manual drop is more reliable for persistent issues.
+            const schemaRes = await pgPool.query(`
+                SELECT data_type
+                FROM information_schema.columns
+                WHERE table_name = 'user_sessions' AND column_name = 'expire';
+            `);
+            if (schemaRes.rows.length > 0 && schemaRes.rows[0].data_type !== 'timestamp with time zone') {
+                console.warn(`[WARN] 'user_sessions' table exists, but 'expire' column is of type '${schemaRes.rows[0].data_type}'. Expected 'timestamp with time zone'. Manual table drop might be needed.`);
+            } else if (schemaRes.rows.length === 0) {
+                console.warn(`[WARN] 'user_sessions' table exists, but 'expire' column not found. Manual table drop might be needed.`);
+            } else {
+                console.log("✅ 'expire' column is correctly 'timestamp with time zone'.");
+            }
         }
     } catch (error) {
         console.error("❌ Database initialization failed:", error.message);
@@ -146,7 +159,8 @@ initDatabase().then(() => {
     app.use(session({
         store: new pgSession({
             pool : pgPool,                // Connection pool
-            tableName : 'user_sessions'   // Use a custom table name for sessions
+            tableName : 'user_sessions',  // Use a custom table name for sessions
+            timestamps: false             // IMPORTANT: Use TIMESTAMP WITH TIME ZONE for expire column
         }),
         secret: SESSION_SECRET,
         resave: false,
