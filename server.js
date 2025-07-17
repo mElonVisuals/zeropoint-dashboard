@@ -100,6 +100,13 @@ pgPool.on('error', (err) => console.error('❌ PostgreSQL Pool Error', err.messa
 /**
  * Initializes the database by checking if the 'user_sessions' table exists.
  * If not, it creates the table with the required schema.
+ *
+ * NOTE: If you continue to see "operator does not exist: bigint >= timestamp with time zone" errors
+ * even after deploying this code, it means the 'user_sessions' table in your database
+ * still has an incorrect schema (e.g., 'expire' is TIMESTAMP WITH TIME ZONE).
+ * In such cases, you MUST manually drop the 'user_sessions' table in your PostgreSQL database
+ * (e.g., using `DROP TABLE IF EXISTS user_sessions;`) and then redeploy your application.
+ * This will allow this function to recreate it with the correct 'BIGINT' type for 'expire'.
  */
 async function initDatabase() {
     try {
@@ -126,8 +133,6 @@ async function initDatabase() {
             console.log("✅ 'user_sessions' table created successfully!");
         } else {
             console.log("✅ 'user_sessions' table already exists.");
-            // Additional check: If table exists, verify schema if possible (more complex for this context)
-            // For now, rely on manual drop/recreate if the error persists.
         }
     } catch (error) {
         console.error("❌ Database initialization failed:", error.message);
