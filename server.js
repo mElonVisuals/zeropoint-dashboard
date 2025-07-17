@@ -642,6 +642,7 @@ initDatabase().then(() => {
     });
 
     // Catch-all route for any other requests that don't match, redirect to index.html
+    // This should be the very last route defined.
     app.get('*', (req, res) => {
         console.log(`[DEBUG] Catch-all route for: ${req.path}. Redirecting to /.`);
         res.redirect('/');
