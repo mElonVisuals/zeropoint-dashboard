@@ -1,17 +1,25 @@
 {
   "name": "zeropoint-webdashboard",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
+ "keywords": [
+    "express",
+    "discord",
+    "dashboard",
+    "oauth2",
+    "postgresql",
+    "zeropoint"
+  ],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "axios": "^1.10.0",
     "connect-pg-simple": "^10.0.0",
+    "discord-oauth2": "^2.11.0",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
