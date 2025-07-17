@@ -73,7 +73,7 @@
             width: 100%;
             height: 100%;
             /* SVG data for a subtle noise pattern */
-            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcn48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
+            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
             background-size: 100px; /* Size of the noise pattern */
             opacity: 0.01; /* Very subtle */
             z-index: -1; /* Between gradients and content */
@@ -951,7 +951,7 @@
     </div>
 
     <script>
-        // Define base URL for API calls (simulated)
+        // Define base URL for API calls (assumed to be your Node.js/Express backend)
         const BASE_URL = window.location.origin;
 
         // Global variables for dashboard state
@@ -959,6 +959,7 @@
         let botGuilds = [];  // Stores guilds the bot is present in
         let selectedGuildId = null; // Currently selected guild ID
         let selectedGuildName = ''; // Currently selected guild name
+        let currentUserId = null; // Stores the authenticated user's ID
 
         // Chart instances
         let memberGrowthChartInstance = null;
@@ -1174,10 +1175,44 @@
             // Set current year in footer
             document.getElementById('current-year').textContent = new Date().getFullYear();
 
-            // --- Initial Data Fetch & Render ---
-            await fetchUserData();
-            await fetchBotGuilds();
-            renderGuildList();
+            // --- Authentication and Data Fetching ---
+            // The `initialAuthToken` is provided by the Canvas environment for authentication.
+            // This part is crucial for identifying the user.
+            // Note: Firebase authentication is used here as provided by the Canvas environment
+            // to get the current user ID. This ID is then used for backend API calls.
+            if (typeof auth !== 'undefined' && typeof onAuthStateChanged !== 'undefined') {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        console.log("Authenticated user ID:", currentUserId);
+                        await fetchUserData(); // Fetch user data from backend
+                        await fetchBotGuilds(); // Fetch bot guilds from backend
+                    } else {
+                        // If no user is authenticated, try to sign in anonymously
+                        // or with the custom token if provided.
+                        try {
+                            // __initial_auth_token is provided by the Canvas environment
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                                console.log("Signed in with custom token.");
+                            } else {
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously.");
+                            }
+                        } catch (error) {
+                            console.error("Firebase authentication error:", error);
+                            showMessage('Authentication failed. Please try logging in again.', 'error');
+                            usernameSpan.textContent = 'Guest';
+                            guildListElement.innerHTML = '<li class="text-red-400 p-3">Authentication failed.</li>';
+                        }
+                    }
+                });
+            } else {
+                console.error("Firebase Auth not loaded. Cannot authenticate user.");
+                usernameSpan.textContent = 'Error: Auth Not Loaded';
+                guildListElement.innerHTML = '<li class="text-red-400 p-3">Authentication system not available.</li>';
+            }
+
 
             // --- Event Listeners ---
             // Navigation clicks
@@ -1308,103 +1343,84 @@
         }
 
         /**
-         * Simulates fetching user data from a backend.
-         * In a real app, this would involve an authenticated API call.
+         * Fetches user data from the backend (PostgreSQL).
+         * Assumes an endpoint like `/api/user` that returns the logged-in user's details.
          */
         async function fetchUserData() {
+            usernameSpan.textContent = 'Loading...';
             try {
-                // Simulate network request delay
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                // Dummy user data
-                const dummyUserData = {
-                    username: 'DashboardUser',
-                    discriminator: '0001',
-                    guilds: [
-                        { id: '101', name: 'My Awesome Server', icon: 'a_1' },
-                        { id: '102', name: 'Dev Community', icon: null },
-                        { id: '103', name: 'Gaming Hub', icon: 'a_2' },
-                        { id: '104', name: 'Testing Ground', icon: null },
-                        { id: '105', name: 'Another Server', icon: 'a_3' },
-                        { id: '106', name: 'Bot Testing Area', icon: null },
-                        { id: '107', name: 'Private Zone', icon: 'a_4' },
-                        { id: '108', name: 'Public Hangout', icon: null },
-                        { id: '109', name: 'Creative Space', icon: 'a_5' },
-                        { id: '110', name: 'Study Group', icon: null },
-                    ]
-                };
-
-                // Try to load user data from localStorage if available
-                const storedUserData = localStorage.getItem('zeroPointUserData');
-                if (storedUserData) {
-                    userGuilds = JSON.parse(storedUserData).guilds;
-                    usernameSpan.textContent = JSON.parse(storedUserData).username + '#' + JSON.parse(storedUserData).discriminator;
+                const response = await fetch(`${BASE_URL}/user`); // Your server.js already has this endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const userData = await response.json();
+                if (userData && userData.username) {
+                    usernameSpan.textContent = userData.username; // Assuming 'username' field from Discord profile
                 } else {
-                    userGuilds = dummyUserData.guilds;
-                    usernameSpan.textContent = dummyUserData.username + '#' + dummyUserData.discriminator;
-                    localStorage.setItem('zeroPointUserData', JSON.stringify(dummyUserData)); // Save dummy data
+                    usernameSpan.textContent = 'User Not Found';
+                    showMessage('User data not found on backend.', 'error');
                 }
             } catch (error) {
-                console.error('Error fetching user data:', error);
-                showMessage('Failed to load user data. Please try logging in again.', 'error');
-                // In a real app, you'd redirect to login: window.location.href = BASE_URL + '/login';
+                console.error('Error fetching user data from backend:', error);
+                usernameSpan.textContent = 'Error Loading User';
+                showMessage('Failed to load user data. Please check backend connection.', 'error');
             }
         }
 
         /**
-         * Simulates fetching guilds where the bot is present.
-         * In a real app, this would be an API call to your bot's backend.
+         * Fetches guilds where the bot is present from the backend (PostgreSQL).
+         * Assumes an endpoint like `/api/bot-guilds` that returns a list of guilds.
          */
         async function fetchBotGuilds() {
+            guildListElement.innerHTML = '<li class="text-gray-400 p-3">Loading servers...</li>';
             try {
-                // Simulate network request delay
-                await new Promise(resolve => setTimeout(resolve, 400));
-
-                // Dummy bot guilds data (subset of user guilds)
-                const dummyBotGuilds = [
-                    { id: '101', name: 'My Awesome Server' },
-                    { id: '103', name: 'Gaming Hub' },
-                    { id: '105', name: 'Another Server' },
-                    { id: '107', name: 'Private Zone' },
-                    { id: '109', name: 'Creative Space' }
-                ];
-
-                // For demonstration, let's assume the bot is in a few of the user's guilds.
-                // In a real scenario, this would be fetched from your bot's API.
-                botGuilds = dummyBotGuilds;
-
+                const response = await fetch(`${BASE_URL}/bot-guilds`); // Your server.js already has this endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data && Array.isArray(data)) { // Discord API returns an array directly
+                    botGuilds = data; // Update global botGuilds
+                    renderGuildList(); // Re-render the list with fetched data
+                } else {
+                    guildListElement.innerHTML = '<li class="text-gray-400 p-3">No bot servers found.</li>';
+                    guildsHeader.classList.add('hidden');
+                    showMessage('No bot server data available from backend.', 'error');
+                }
             } catch (error) {
-                console.error('Error fetching bot guilds:', error);
-                guildListElement.innerHTML = '<li class="text-red-400 p-3">Could not load bot servers. Please ensure the bot is online.</li>';
+                console.error('Error fetching bot guilds from backend:', error);
+                guildListElement.innerHTML = '<li class="text-red-400 p-3">Could not load bot servers. Check backend.</li>';
                 guildsHeader.classList.add('hidden');
-                showMessage('Failed to load bot server list. Check bot status.', 'error');
+                showMessage('Failed to load bot server list. Check backend connection.', 'error');
             }
         }
 
         /**
-         * Renders the list of guilds in the sidebar where both the user and bot are present.
+         * Renders the list of guilds in the sidebar where the bot is present.
+         * Now uses the `botGuilds` fetched from the backend.
          */
         function renderGuildList() {
             guildListElement.innerHTML = ''; // Clear existing list
 
-            const guildsWithBot = userGuilds.filter(userGuild =>
-                botGuilds.some(botGuild => botGuild.id === userGuild.id)
-            );
-
-            if (guildsWithBot.length === 0) {
+            if (botGuilds.length === 0) {
                 guildsHeader.classList.add('hidden');
-                guildListElement.innerHTML = '<li class="text-gray-400 p-3">ZeroPoint Bot is not in any of your servers.</li>';
+                guildListElement.innerHTML = '<li class="text-gray-400 p-3">ZeroPoint Bot is not in any servers.</li>';
                 return;
             }
 
             guildsHeader.classList.remove('hidden');
 
-            guildsWithBot.forEach(guild => {
+            botGuilds.forEach(guild => {
                 const listItem = document.createElement('li');
                 listItem.className = 'guild-card flex items-center p-3 rounded-md bg-[#282828] hover:bg-[#3A3A3A] transition-colors duration-200';
                 listItem.dataset.guildId = guild.id;
+                // Use guild.icon if available from your backend, otherwise use first letter
+                const guildIconHtml = guild.icon
+                    ? `<img src="https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=32" alt="${guild.name} icon" class="w-8 h-8 rounded-full mr-3">`
+                    : `<div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold mr-3">${guild.name.charAt(0)}</div>`;
+
                 listItem.innerHTML = `
-                    ${guild.icon ? `<img src="https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=32" alt="${guild.name} icon" class="w-8 h-8 rounded-full mr-3">` : `<div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold mr-3">${guild.name.charAt(0)}</div>`}
+                    ${guildIconHtml}
                     <span class="text-white font-medium">${guild.name}</span>
                 `;
                 listItem.addEventListener('click', () => selectGuild(guild.id, guild.name));
@@ -1456,135 +1472,144 @@
         }
 
         /**
-         * Loads settings for a given guild (simulated from localStorage or dummy data).
+         * Loads settings for a given guild from the backend.
          * @param {string} guildId - The ID of the guild to load settings for.
          */
         async function loadSettings(guildId) {
             console.log(`Loading settings for guild: ${guildId}`);
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 700));
+            // Show loading indicators for all sections here if desired
 
-            // Attempt to load settings from localStorage first
-            let settings = JSON.parse(localStorage.getItem(`guildSettings_${guildId}`)) || {};
-
-            // Default dummy settings if nothing is found in localStorage
-            const defaultSettings = {
-                general: { botPrefix: '!', defaultRole: '' },
-                welcome: { welcomeChannel: '', farewellChannel: '', welcomeMessage: `Welcome {user} to ${selectedGuildName}! Enjoy your stay.`, farewellMessage: `{user} has left the server.`, sendWelcomeDM: false },
-                logging: { logChannel: '', logMessages: true, logChannels: true, logMembers: true },
-                ticket: { ticketCategory: '', ticketRole: '', ticketMessage: 'Hello {user}! How can we help you today?' },
-                verification: {
-                    channelId: '', unverifiedRoleId: '', verifiedRoleId: '',
-                    messageContent: 'Welcome {user}! To gain access to the server, please click the "Verify" button below.',
-                    embed: {
-                        title: '✅ Server Verification',
-                        description: 'Please click the button below to verify your account and gain full access to the server. This helps us keep our community safe!',
-                        color: '#2cb4e9', footer: { text: 'ZeroPoint | Verification' }, thumbnail: { url: 'https://melonvisuals.me/test/zeropoint.png' }
-                    }
-                },
-                customCommands: [],
-                reactionRoles: [],
-                leveling: { xpPerMessage: 15, xpCooldown: 60, levelUpMessage: 'Congratulations {user}, you reached level {level}!', levelUpChannel: '', rewards: [] },
-                music: { musicChannel: '', djRoleId: '', allowAnyoneQueue: true },
-                integrations: { webhookUrl: '', webhookChannelId: '' },
-                advanced: { commandCooldown: 3, enableAI: false, adminRoleId: '' },
-                analytics: {
-                    totalMembers: Math.floor(Math.random() * 1000) + 100, // Random number for demo
-                    messages24h: Math.floor(Math.random() * 5000) + 500,
-                    newMembers7d: Math.floor(Math.random() * 100) + 10,
-                    memberGrowthData: Array.from({length: 7}, () => Math.floor(Math.random() * 50) + 5),
-                    messageActivityData: Array.from({length: 7}, () => Math.floor(Math.random() * 1000) + 100),
-                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']
-                },
-                auditLog: generateDummyAuditLog() // Generate dummy audit log entries
-            };
-
-            // Merge loaded settings with defaults to ensure all fields exist
-            settings = { ...defaultSettings, ...settings };
-            for (const key in defaultSettings) {
-                if (typeof defaultSettings[key] === 'object' && defaultSettings[key] !== null && !Array.isArray(defaultSettings[key])) {
-                    settings[key] = { ...defaultSettings[key], ...settings[key] };
+            try {
+                // This is the primary API call to your backend to fetch all settings for the guild.
+                // You NEED to implement this endpoint in your server.js to query your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${guildId}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch settings: ${response.statusText}`);
                 }
+                const settings = await response.json();
+                console.log(`Fetched settings for guild ${guildId}:`, settings);
+
+                // Default settings if a specific setting is not found in the fetched data
+                const defaultSettings = {
+                    general: { botPrefix: '!', defaultRole: '' },
+                    welcome: { welcomeChannel: '', farewellChannel: '', welcomeMessage: `Welcome {user} to ${selectedGuildName}! Enjoy your stay.`, farewellMessage: `{user} has left the server.`, sendWelcomeDM: false },
+                    logging: { logChannel: '', logMessages: true, logChannels: true, logMembers: true },
+                    ticket: { ticketCategory: '', ticketRole: '', ticketMessage: 'Hello {user}! How can we help you today?' },
+                    verification: {
+                        channelId: '', unverifiedRoleId: '', verifiedRoleId: '',
+                        messageContent: 'Welcome {user}! To gain access to the server, please click the "Verify" button below.',
+                        embed: {
+                            title: '✅ Server Verification',
+                            description: 'Please click the button below to verify your account and gain full access to the server. This helps us keep our community safe!',
+                            color: '#2cb4e9', footer: { text: 'ZeroPoint | Verification' }, thumbnail: { url: 'https://melonvisuals.me/test/zeropoint.png' }
+                        }
+                    },
+                    customCommands: [],
+                    reactionRoles: [],
+                    leveling: { xpPerMessage: 15, xpCooldown: 60, levelUpMessage: 'Congratulations {user}, you reached level {level}!', levelUpChannel: '', rewards: [] },
+                    music: { musicChannel: '', djRoleId: '', allowAnyoneQueue: true },
+                    integrations: { webhookUrl: '', webhookChannelId: '' },
+                    advanced: { commandCooldown: 3, enableAI: false, adminRoleId: '' },
+                    analytics: {
+                        totalMembers: 0, messages24h: 0, newMembers7d: 0,
+                        memberGrowthData: [], messageActivityData: [], labels: []
+                    },
+                    auditLog: []
+                };
+
+                // Merge fetched settings with defaults to ensure all fields exist
+                const mergedSettings = { ...defaultSettings, ...settings };
+                for (const key in defaultSettings) {
+                    if (typeof defaultSettings[key] === 'object' && defaultSettings[key] !== null && !Array.isArray(defaultSettings[key])) {
+                        mergedSettings[key] = { ...defaultSettings[key], ...settings[key] };
+                    }
+                }
+
+                // Populate input fields with fetched (or default) data
+                botPrefixInput.value = mergedSettings.general.botPrefix;
+                defaultRoleInput.value = mergedSettings.general.defaultRole;
+
+                welcomeChannelInput.value = mergedSettings.welcome.welcomeChannel;
+                welcomeMessageInput.value = mergedSettings.welcome.welcomeMessage;
+                welcomeDMCheckbox.checked = mergedSettings.welcome.sendWelcomeDM;
+                farewellChannelInput.value = mergedSettings.welcome.farewellChannel;
+                farewellMessageInput.value = mergedSettings.welcome.farewellMessage;
+
+                logChannelInput.value = mergedSettings.logging.logChannel;
+                logMessagesCheckbox.checked = mergedSettings.logging.logMessages;
+                logChannelsCheckbox.checked = mergedSettings.logging.logChannels;
+                logMembersCheckbox.checked = mergedSettings.logging.logMembers;
+
+                ticketCategoryInput.value = mergedSettings.ticket.ticketCategory;
+                ticketRoleInput.value = mergedSettings.ticket.ticketRole;
+                ticketMessageInput.value = mergedSettings.ticket.ticketMessage;
+
+                verificationChannelIdInput.value = mergedSettings.verification.channelId;
+                unverifiedRoleIdInput.value = mergedSettings.verification.unverifiedRoleId;
+                verifiedRoleIdInput.value = mergedSettings.verification.verifiedRoleId;
+                verificationMessageContentInput.value = mergedSettings.verification.messageContent;
+                verificationEmbedTitleInput.value = mergedSettings.verification.embed.title;
+                verificationEmbedDescriptionInput.value = mergedSettings.verification.embed.description;
+                verificationEmbedColorInput.value = mergedSettings.verification.embed.color;
+                verificationEmbedFooterInput.value = mergedSettings.verification.embed.footer.text;
+                verificationEmbedThumbnailInput.value = mergedSettings.verification.embed.thumbnail.url;
+                updateVerificationEmbedPreview();
+
+                // Custom Commands
+                renderCustomCommands(mergedSettings.customCommands);
+
+                // Reaction Roles
+                renderReactionRoles(mergedSettings.reactionRoles);
+
+                // Leveling
+                xpPerMessageInput.value = mergedSettings.leveling.xpPerMessage;
+                xpCooldownInput.value = mergedSettings.leveling.xpCooldown;
+                levelUpMessageInput.value = mergedSettings.leveling.levelUpMessage;
+                levelUpChannelInput.value = mergedSettings.leveling.levelUpChannel;
+                renderLevelRewards(mergedSettings.leveling.rewards);
+
+                // Music
+                musicChannelInput.value = mergedSettings.music.musicChannel;
+                djRoleIdInput.value = mergedSettings.music.djRoleId;
+                allowAnyoneQueueCheckbox.checked = mergedSettings.music.allowAnyoneQueue;
+
+                // Integrations
+                webhookUrlInput.value = mergedSettings.integrations.webhookUrl;
+                webhookChannelIdInput.value = mergedSettings.integrations.webhookChannelId;
+
+                commandCooldownInput.value = mergedSettings.advanced.commandCooldown;
+                enableAICheckbox.checked = mergedSettings.advanced.enableAI;
+                adminRoleIdInput.value = mergedSettings.advanced.adminRoleId;
+
+                // Clear Announcement Builder fields on guild change (always fresh)
+                announcementChannelIdInput.value = '';
+                announcementEmbedTitleInput.value = '';
+                announcementEmbedDescriptionInput.value = '';
+                announcementEmbedColorInput.value = '#5F9EA0'; // Default color
+                announcementEmbedFooterInput.value = '';
+                announcementEmbedThumbnailInput.value = '';
+                updateAnnouncementEmbedPreview();
+
+                // Load Analytics Data
+                totalMembersSpan.textContent = mergedSettings.analytics.totalMembers.toLocaleString();
+                messages24hSpan.textContent = mergedSettings.analytics.messages24h.toLocaleString();
+                newMembers7dSpan.textContent = mergedSettings.analytics.newMembers7d.toLocaleString();
+                renderMemberGrowthChart(mergedSettings.analytics.labels, mergedSettings.analytics.memberGrowthData);
+                renderMessageActivityChart(mergedSettings.analytics.labels, mergedSettings.analytics.messageActivityData);
+
+                // Load Audit Log
+                currentAuditLogs = mergedSettings.auditLog; // Store the full log data
+                filterAuditLog(); // Apply initial filter/search
+            } catch (error) {
+                console.error('Error loading settings for guild:', error);
+                showMessage(`Failed to load settings for ${selectedGuildName}. Please check backend connection.`, 'error');
+                // Optionally clear fields or show a "failed to load" state
+                // For now, fields will retain their default empty/initial values if fetch fails.
             }
-
-            // Populate input fields
-            botPrefixInput.value = settings.general.botPrefix;
-            defaultRoleInput.value = settings.general.defaultRole;
-
-            welcomeChannelInput.value = settings.welcome.welcomeChannel;
-            welcomeMessageInput.value = settings.welcome.welcomeMessage;
-            welcomeDMCheckbox.checked = settings.welcome.sendWelcomeDM;
-            farewellChannelInput.value = settings.welcome.farewellChannel;
-            farewellMessageInput.value = settings.welcome.farewellMessage;
-
-            logChannelInput.value = settings.logging.logChannel;
-            logMessagesCheckbox.checked = settings.logging.logMessages;
-            logChannelsCheckbox.checked = settings.logging.logChannels;
-            logMembersCheckbox.checked = settings.logging.logMembers;
-
-            ticketCategoryInput.value = settings.ticket.ticketCategory;
-            ticketRoleInput.value = settings.ticket.ticketRole;
-            ticketMessageInput.value = settings.ticket.ticketMessage;
-
-            verificationChannelIdInput.value = settings.verification.channelId;
-            unverifiedRoleIdInput.value = settings.verification.unverifiedRoleId;
-            verifiedRoleIdInput.value = settings.verification.verifiedRoleId;
-            verificationMessageContentInput.value = settings.verification.messageContent;
-            verificationEmbedTitleInput.value = settings.verification.embed.title;
-            verificationEmbedDescriptionInput.value = settings.verification.embed.description;
-            verificationEmbedColorInput.value = settings.verification.embed.color;
-            verificationEmbedFooterInput.value = settings.verification.embed.footer.text;
-            verificationEmbedThumbnailInput.value = settings.verification.embed.thumbnail.url;
-            updateVerificationEmbedPreview();
-
-            // Custom Commands
-            renderCustomCommands(settings.customCommands);
-
-            // Reaction Roles
-            renderReactionRoles(settings.reactionRoles);
-
-            // Leveling
-            xpPerMessageInput.value = settings.leveling.xpPerMessage;
-            xpCooldownInput.value = settings.leveling.xpCooldown;
-            levelUpMessageInput.value = settings.leveling.levelUpMessage;
-            levelUpChannelInput.value = settings.leveling.levelUpChannel;
-            renderLevelRewards(settings.leveling.rewards);
-
-            // Music
-            musicChannelInput.value = settings.music.musicChannel;
-            djRoleIdInput.value = settings.music.djRoleId;
-            allowAnyoneQueueCheckbox.checked = settings.music.allowAnyoneQueue;
-
-            // Integrations
-            webhookUrlInput.value = settings.integrations.webhookUrl;
-            webhookChannelIdInput.value = settings.integrations.webhookChannelId;
-
-            commandCooldownInput.value = settings.advanced.commandCooldown;
-            enableAICheckbox.checked = settings.advanced.enableAI;
-            adminRoleIdInput.value = settings.advanced.adminRoleId;
-
-            // Clear Announcement Builder fields on guild change
-            announcementChannelIdInput.value = '';
-            announcementEmbedTitleInput.value = '';
-            announcementEmbedDescriptionInput.value = '';
-            announcementEmbedColorInput.value = '#5F9EA0'; // Default color
-            announcementEmbedFooterInput.value = '';
-            announcementEmbedThumbnailInput.value = '';
-            updateAnnouncementEmbedPreview();
-
-            // Load Analytics Data
-            totalMembersSpan.textContent = settings.analytics.totalMembers.toLocaleString();
-            messages24hSpan.textContent = settings.analytics.messages24h.toLocaleString();
-            newMembers7dSpan.textContent = settings.analytics.newMembers7d.toLocaleString();
-            renderMemberGrowthChart(settings.analytics.labels, settings.analytics.memberGrowthData);
-            renderMessageActivityChart(settings.analytics.labels, settings.analytics.messageActivityData);
-
-            // Load Audit Log
-            loadAuditLog(guildId); // This will also handle initial filtering
         }
 
         /**
-         * Saves settings for the currently selected guild (simulated to localStorage).
+         * Saves settings for the currently selected guild to the backend.
          * @param {string} settingType - The category of settings being saved (e.g., 'general', 'welcome').
          */
         async function saveSettings(settingType) {
@@ -1596,9 +1621,7 @@
             let dataToSave = {};
             let statusMessageElement;
             let saveButtonElement;
-
-            // Get current settings from localStorage or default if not exists
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
+            let endpoint = `${BASE_URL}/api/guild-settings/${selectedGuildId}/${settingType}`; // Generic endpoint for categories
 
             // Populate dataToSave based on settingType
             switch (settingType) {
@@ -1663,7 +1686,7 @@
                         xpCooldown: parseInt(xpCooldownInput.value, 10),
                         levelUpMessage: levelUpMessageInput.value,
                         levelUpChannel: levelUpChannelInput.value,
-                        rewards: currentSettings.leveling ? currentSettings.leveling.rewards : [] // Retain existing rewards
+                        // Rewards are managed separately by addLevelReward/deleteLevelReward
                     };
                     statusMessageElement = levelingStatusMsg;
                     saveButtonElement = saveLevelingSettingsBtn;
@@ -1706,12 +1729,17 @@
             statusMessageElement.classList.add('show');
 
             try {
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // Update the specific settingType in currentSettings
-                currentSettings[settingType] = { ...currentSettings[settingType], ...dataToSave };
-                localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+                // This is the API call to your backend to save settings.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(endpoint, {
+                    method: 'POST', // or PUT, depending on your backend's design
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSave)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // const result = await response.json(); // If your backend returns a confirmation
 
                 statusMessageElement.textContent = 'Settings saved successfully!';
                 statusMessageElement.classList.add('status-success');
@@ -1729,7 +1757,7 @@
         }
 
         /**
-         * Adds a new custom command to the list (simulated to localStorage).
+         * Adds a new custom command to the backend.
          */
         async function addCustomCommand() {
             if (!selectedGuildId) {
@@ -1764,33 +1792,45 @@
                 }
             }
 
-            // Load current settings
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.customCommands = currentSettings.customCommands || [];
+            customCommandStatusMsg.textContent = 'Adding command...';
+            customCommandStatusMsg.classList.remove('status-success', 'status-error');
+            customCommandStatusMsg.classList.add('show');
 
-            // Check for duplicate command names
-            if (currentSettings.customCommands.some(cmd => cmd.name === commandName)) {
-                await showCustomModal('Error', `A command named '${commandName}' already exists.`, false);
-                return;
+            try {
+                // This is the API call to your backend to add a custom command.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/custom-commands`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(commandData)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                customCommandStatusMsg.textContent = `Command '${commandName}' added successfully!`;
+                customCommandStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list including the new command
+                await loadSettings(selectedGuildId);
+
+                // Clear form fields
+                newCommandNameInput.value = '';
+                newCommandResponseInput.value = '';
+                newCommandTypeInput.value = 'text';
+                newCommandEmbedFieldsDiv.classList.add('hidden');
+                newCommandEmbedTitleInput.value = '';
+                newCommandEmbedDescriptionInput.value = '';
+                newCommandEmbedColorInput.value = '';
+
+            } catch (error) {
+                console.error('Error adding custom command:', error);
+                customCommandStatusMsg.textContent = `Error: ${error.message}`;
+                customCommandStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
             }
-
-            currentSettings.customCommands.push(commandData);
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
-
-            customCommandStatusMsg.textContent = `Command '${commandName}' added successfully!`;
-            customCommandStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
-
-            // Clear form fields
-            newCommandNameInput.value = '';
-            newCommandResponseInput.value = '';
-            newCommandTypeInput.value = 'text';
-            newCommandEmbedFieldsDiv.classList.add('hidden');
-            newCommandEmbedTitleInput.value = '';
-            newCommandEmbedDescriptionInput.value = '';
-            newCommandEmbedColorInput.value = '';
-
-            renderCustomCommands(currentSettings.customCommands);
         }
 
         /**
@@ -1829,7 +1869,7 @@
         }
 
         /**
-         * Deletes a custom command from the list (simulated to localStorage).
+         * Deletes a custom command from the backend.
          * @param {number} index - The index of the command to delete.
          */
         async function deleteCustomCommand(index) {
@@ -1838,19 +1878,38 @@
                 return;
             }
 
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.customCommands.splice(index, 1);
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+            customCommandStatusMsg.textContent = 'Deleting command...';
+            customCommandStatusMsg.classList.remove('status-success', 'status-error');
+            customCommandStatusMsg.classList.add('show');
 
-            customCommandStatusMsg.textContent = 'Command deleted successfully!';
-            customCommandStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+            try {
+                // This is the API call to your backend to delete a custom command.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/custom-commands/${index}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
 
-            renderCustomCommands(currentSettings.customCommands);
+                customCommandStatusMsg.textContent = 'Command deleted successfully!';
+                customCommandStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list
+                await loadSettings(selectedGuildId);
+
+            } catch (error) {
+                console.error('Error deleting custom command:', error);
+                customCommandStatusMsg.textContent = `Error: ${error.message}`;
+                customCommandStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => customCommandStatusMsg.classList.remove('show'), 3000);
+            }
         }
 
         /**
-         * Adds a new reaction role to the list (simulated to localStorage).
+         * Adds a new reaction role to the backend.
          */
         async function addReactionRole() {
             if (!selectedGuildId) {
@@ -1870,24 +1929,44 @@
                 return;
             }
 
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.reactionRoles = currentSettings.reactionRoles || [];
-
             const newReactionRole = { channelId, messageContent, emoji, roleId };
-            currentSettings.reactionRoles.push(newReactionRole);
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
 
-            reactionRoleStatusMsg.textContent = 'Reaction role added successfully!';
-            reactionRoleStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+            reactionRoleStatusMsg.textContent = 'Adding reaction role...';
+            reactionRoleStatusMsg.classList.remove('status-success', 'status-error');
+            reactionRoleStatusMsg.classList.add('show');
 
-            // Clear form fields
-            reactionRoleChannelIdInput.value = '';
-            reactionRoleMessageContentInput.value = '';
-            reactionRoleEmojiInput.value = '';
-            reactionRoleRoleIdInput.value = '';
+            try {
+                // This is the API call to your backend to add a reaction role.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/reaction-roles`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newReactionRole)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
 
-            renderReactionRoles(currentSettings.reactionRoles);
+                reactionRoleStatusMsg.textContent = 'Reaction role added successfully!';
+                reactionRoleStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list
+                await loadSettings(selectedGuildId);
+
+                // Clear form fields
+                reactionRoleChannelIdInput.value = '';
+                reactionRoleMessageContentInput.value = '';
+                reactionRoleEmojiInput.value = '';
+                reactionRoleRoleIdInput.value = '';
+
+            } catch (error) {
+                console.error('Error adding reaction role:', error);
+                reactionRoleStatusMsg.textContent = `Error: ${error.message}`;
+                reactionRoleStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+            }
         }
 
         /**
@@ -1926,7 +2005,7 @@
         }
 
         /**
-         * Deletes a reaction role from the list (simulated to localStorage).
+         * Deletes a reaction role from the backend.
          * @param {number} index - The index of the reaction role to delete.
          */
         async function deleteReactionRole(index) {
@@ -1935,19 +2014,38 @@
                 return;
             }
 
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.reactionRoles.splice(index, 1);
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+            reactionRoleStatusMsg.textContent = 'Deleting reaction role...';
+            reactionRoleStatusMsg.classList.remove('status-success', 'status-error');
+            reactionRoleStatusMsg.classList.add('show');
 
-            reactionRoleStatusMsg.textContent = 'Reaction role deleted successfully!';
-            reactionRoleStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+            try {
+                // This is the API call to your backend to delete a reaction role.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/reaction-roles/${index}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
 
-            renderReactionRoles(currentSettings.reactionRoles);
+                reactionRoleStatusMsg.textContent = 'Reaction role deleted successfully!';
+                reactionRoleStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list
+                await loadSettings(selectedGuildId);
+
+            } catch (error) {
+                console.error('Error deleting reaction role:', error);
+                reactionRoleStatusMsg.textContent = `Error: ${error.message}`;
+                reactionRoleStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => reactionRoleStatusMsg.classList.remove('show'), 3000);
+            }
         }
 
         /**
-         * Adds a new level reward to the list (simulated to localStorage).
+         * Adds a new level reward to the backend.
          */
         async function addLevelReward() {
             if (!selectedGuildId) {
@@ -1965,29 +2063,42 @@
                 return;
             }
 
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.leveling = currentSettings.leveling || {};
-            currentSettings.leveling.rewards = currentSettings.leveling.rewards || [];
+            const newReward = { level, roleId };
 
-            // Check for duplicate level rewards
-            if (currentSettings.leveling.rewards.some(reward => reward.level === level)) {
-                await showCustomModal('Error', `A reward for level ${level} already exists.`, false);
-                return;
+            levelingStatusMsg.textContent = 'Adding level reward...';
+            levelingStatusMsg.classList.remove('status-success', 'status-error');
+            levelingStatusMsg.classList.add('show');
+
+            try {
+                // This is the API call to your backend to add a level reward.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/leveling-rewards`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newReward)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                levelingStatusMsg.textContent = `Level reward for level ${level} added successfully!`;
+                levelingStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list
+                await loadSettings(selectedGuildId);
+
+                // Clear form fields
+                rewardLevelInput.value = '';
+                rewardRoleIdInput.value = '';
+
+            } catch (error) {
+                console.error('Error adding level reward:', error);
+                levelingStatusMsg.textContent = `Error: ${error.message}`;
+                levelingStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
             }
-
-            currentSettings.leveling.rewards.push({ level, roleId });
-            currentSettings.leveling.rewards.sort((a, b) => a.level - b.level); // Keep sorted
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
-
-            levelingStatusMsg.textContent = `Level reward for level ${level} added successfully!`;
-            levelingStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
-
-            // Clear form fields
-            rewardLevelInput.value = '';
-            rewardRoleIdInput.value = '';
-
-            renderLevelRewards(currentSettings.leveling.rewards);
         }
 
         /**
@@ -2025,7 +2136,7 @@
         }
 
         /**
-         * Deletes a level reward from the list (simulated to localStorage).
+         * Deletes a level reward from the backend.
          * @param {number} index - The index of the reward to delete.
          */
         async function deleteLevelReward(index) {
@@ -2034,20 +2145,39 @@
                 return;
             }
 
-            let currentSettings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-            currentSettings.leveling.rewards.splice(index, 1);
-            localStorage.setItem(`guildSettings_${selectedGuildId}`, JSON.stringify(currentSettings));
+            levelingStatusMsg.textContent = 'Deleting level reward...';
+            levelingStatusMsg.classList.remove('status-success', 'status-error');
+            levelingStatusMsg.classList.add('show');
 
-            levelingStatusMsg.textContent = 'Level reward deleted successfully!';
-            levelingStatusMsg.classList.add('show', 'status-success');
-            setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
+            try {
+                // This is the API call to your backend to delete a level reward.
+                // You NEED to implement this endpoint in your server.js to update your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/guild-settings/${selectedGuildId}/leveling-rewards/${index}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
 
-            renderLevelRewards(currentSettings.leveling.rewards);
+                levelingStatusMsg.textContent = 'Level reward deleted successfully!';
+                levelingStatusMsg.classList.add('status-success');
+
+                // Reload all settings to get the updated list
+                await loadSettings(selectedGuildId);
+
+            } catch (error) {
+                console.error('Error deleting level reward:', error);
+                levelingStatusMsg.textContent = `Error: ${error.message}`;
+                levelingStatusMsg.classList.add('status-error');
+            } finally {
+                setTimeout(() => levelingStatusMsg.classList.remove('show'), 3000);
+            }
         }
 
 
         /**
-         * Sends an announcement message (simulated).
+         * Sends an announcement message via the backend.
          */
         async function sendAnnouncement() {
             if (!selectedGuildId) {
@@ -2093,26 +2223,31 @@
             announcementStatusMsg.classList.add('show');
 
             try {
-                // Simulate sending to backend
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                const success = Math.random() > 0.1; // 90% chance of success for demo
-
-                if (success) {
-                    announcementStatusMsg.textContent = 'Announcement sent successfully!';
-                    announcementStatusMsg.classList.add('status-success');
-                    console.log(`Simulated announcement sent to channel ${channelId} in guild ${selectedGuildId}:`, embedData);
-
-                    // Clear fields after successful send
-                    announcementChannelIdInput.value = '';
-                    announcementEmbedTitleInput.value = '';
-                    announcementEmbedDescriptionInput.value = '';
-                    announcementEmbedColorInput.value = '#5F9EA0';
-                    announcementEmbedFooterInput.value = '';
-                    announcementEmbedThumbnailInput.value = '';
-                    updateAnnouncementEmbedPreview();
-                } else {
-                    throw new Error('Failed to send announcement (simulated backend error).');
+                // This is the API call to your backend to send an announcement.
+                // Your server.js already has this endpoint.
+                const response = await fetch(`${BASE_URL}/api/send-announcement/${selectedGuildId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ channelId, embedData })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Failed to send announcement: ${response.statusText}`);
                 }
+
+                announcementStatusMsg.textContent = 'Announcement sent successfully!';
+                announcementStatusMsg.classList.add('status-success');
+                console.log(`Announcement sent to channel ${channelId} in guild ${selectedGuildId}.`);
+
+                // Clear fields after successful send
+                announcementChannelIdInput.value = '';
+                announcementEmbedTitleInput.value = '';
+                announcementEmbedDescriptionInput.value = '';
+                announcementEmbedColorInput.value = '#5F9EA0';
+                announcementEmbedFooterInput.value = '';
+                announcementEmbedThumbnailInput.value = '';
+                updateAnnouncementEmbedPreview();
+
             } catch (error) {
                 console.error('Error sending announcement:', error);
                 announcementStatusMsg.textContent = `Error: ${error.message}`;
@@ -2202,11 +2337,48 @@
 
             // Special handling for analytics charts (re-render when visible)
             if (sectionId === 'analytics-settings' && selectedGuildId) {
-                const settings = JSON.parse(localStorage.getItem(`guildSettings_${selectedGuildId}`)) || {};
-                renderMemberGrowthChart(settings.analytics.labels, settings.analytics.memberGrowthData);
-                renderMessageActivityChart(settings.analytics.labels, settings.analytics.messageActivityData);
+                // When analytics section is shown, fetch fresh data and render charts
+                fetchAnalyticsData(selectedGuildId);
             }
         }
+
+        /**
+         * Fetches analytics data for a given guild from the backend.
+         * @param {string} guildId - The ID of the guild.
+         */
+        async function fetchAnalyticsData(guildId) {
+            totalMembersSpan.textContent = '--';
+            messages24hSpan.textContent = '--';
+            newMembers7dSpan.textContent = '--';
+            if (memberGrowthChartInstance) memberGrowthChartInstance.destroy();
+            if (messageActivityChartInstance) messageActivityChartInstance.destroy();
+
+            try {
+                // This is the API call to your backend to fetch analytics data.
+                // You NEED to implement this endpoint in your server.js to query your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/analytics/${guildId}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
+                }
+                const analyticsData = await response.json();
+                console.log(`Fetched analytics for guild ${guildId}:`, analyticsData);
+
+                totalMembersSpan.textContent = (analyticsData.totalMembers || 0).toLocaleString();
+                messages24hSpan.textContent = (analyticsData.messages24h || 0).toLocaleString();
+                newMembers7dSpan.textContent = (analyticsData.newMembers7d || 0).toLocaleString();
+
+                renderMemberGrowthChart(analyticsData.labels || [], analyticsData.memberGrowthData || []);
+                renderMessageActivityChart(analyticsData.labels || [], analyticsData.messageActivityData || []);
+
+            } catch (error) {
+                console.error('Error fetching analytics data:', error);
+                showMessage('Failed to load server analytics. Please check backend connection.', 'error');
+                totalMembersSpan.textContent = 'Error';
+                messages24hSpan.textContent = 'Error';
+                newMembers7dSpan.textContent = 'Error';
+            }
+        }
+
 
         /**
          * Renders the Member Growth Chart using Chart.js.
@@ -2337,46 +2509,10 @@
             });
         }
 
-        /**
-         * Generates dummy audit log entries for demonstration.
-         * @returns {Array<Object>} An array of dummy audit log entries.
-         */
-        function generateDummyAuditLog() {
-            const users = ['User#1234', 'Admin#0001', 'Moderator#5678', 'Bot#9999'];
-            const actions = [
-                { type: 'MEMBER_KICK', description: 'kicked {target} for spamming.' },
-                { type: 'MEMBER_BAN_ADD', description: 'banned {target} for rule breaking.' },
-                { type: 'CHANNEL_CREATE', description: 'created text channel #general-chat.' },
-                { type: 'ROLE_UPDATE', description: 'updated role "Member" permissions.' },
-                { type: 'MESSAGE_DELETE', description: 'deleted a message by {target}.' },
-                { type: 'GUILD_UPDATE', description: 'changed server name to "The Awesome Place".' },
-                { type: 'MEMBER_ROLE_UPDATE', description: 'added role "Moderator" to {target}.' },
-                { type: 'BOT_ADD', description: 'added bot "HelperBot#1234".' }
-            ];
-            const targets = ['Alice#0001', 'Bob#0002', 'Charlie#0003', 'DiscordUser#5555'];
-
-            const logs = [];
-            for (let i = 0; i < 20; i++) {
-                const user = users[Math.floor(Math.random() * users.length)];
-                const action = actions[Math.floor(Math.random() * actions.length)];
-                const target = targets[Math.floor(Math.random() * targets.length)];
-                const timestamp = new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toLocaleString(); // Last 7 days
-
-                let description = action.description.replace('{target}', target);
-
-                logs.push({
-                    id: `log-${Date.now()}-${i}`,
-                    user: user,
-                    type: action.type,
-                    description: description,
-                    timestamp: timestamp
-                });
-            }
-            return logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        }
+        let currentAuditLogs = []; // Stores the full list of logs for the current guild
 
         /**
-         * Loads and renders audit log entries for the selected guild.
+         * Loads and renders audit log entries for the selected guild from the backend.
          * Applies search and filter criteria.
          * @param {string} guildId - The ID of the guild.
          */
@@ -2390,18 +2526,26 @@
             auditLogStatusMsg.textContent = '';
             auditLogStatusMsg.classList.remove('show', 'status-success', 'status-error');
 
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            try {
+                // This is the API call to your backend to fetch audit log data.
+                // You NEED to implement this endpoint in your server.js to query your PostgreSQL DB.
+                const response = await fetch(`${BASE_URL}/api/audit-log/${guildId}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch audit log: ${response.statusText}`);
+                }
+                const allLogs = await response.json();
+                console.log(`Fetched ${allLogs.length} audit log entries for guild ${guildId}.`);
 
-            const settings = JSON.parse(localStorage.getItem(`guildSettings_${guildId}`)) || {};
-            const allLogs = settings.auditLog || [];
-
-            // Store all logs in a temporary variable for filtering
-            currentAuditLogs = allLogs;
-            filterAuditLog(); // Apply initial filter/search
+                currentAuditLogs = allLogs; // Store the full list of logs
+                filterAuditLog(); // Apply initial filter/search
+            } catch (error) {
+                console.error('Error fetching audit log data:', error);
+                auditLogListDiv.innerHTML = '<p class="text-red-400 text-center py-4">Failed to load audit log entries. Check backend connection.</p>';
+                auditLogStatusMsg.textContent = `Error: ${error.message}`;
+                auditLogStatusMsg.classList.add('show', 'status-error');
+                currentAuditLogs = []; // Clear logs on error
+            }
         }
-
-        let currentAuditLogs = []; // Stores the full list of logs for the current guild
 
         /**
          * Filters and renders the audit log entries based on search query and type filter.
@@ -2411,10 +2555,10 @@
             const filterType = auditLogFilterTypeSelect.value;
 
             let filteredLogs = currentAuditLogs.filter(log => {
-                const matchesSearch = log.user.toLowerCase().includes(searchQuery) ||
-                                      log.description.toLowerCase().includes(searchQuery) ||
-                                      log.type.toLowerCase().includes(searchQuery);
-                const matchesType = filterType === '' || log.type === filterType;
+                const matchesSearch = (log.user && log.user.toLowerCase().includes(searchQuery)) ||
+                                      (log.description && log.description.toLowerCase().includes(searchQuery)) ||
+                                      (log.type && log.type.toLowerCase().includes(searchQuery));
+                const matchesType = filterType === '' || (log.type && log.type === filterType);
                 return matchesSearch && matchesType;
             });
 
@@ -2438,10 +2582,10 @@
                 logItem.className = 'p-3 rounded-md bg-gray-800 border border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center';
                 logItem.innerHTML = `
                     <div class="flex-1 mb-2 sm:mb-0">
-                        <p class="font-semibold text-white">${log.user} <span class="text-gray-500 text-sm ml-2">(${log.type.replace('_', ' ')})</span></p>
-                        <p class="text-gray-300 text-sm">${log.description}</p>
+                        <p class="font-semibold text-white">${log.user || 'Unknown User'} <span class="text-gray-500 text-sm ml-2">(${log.type ? log.type.replace('_', ' ') : 'Unknown Action'})</span></p>
+                        <p class="text-gray-300 text-sm">${log.description || 'No description provided.'}</p>
                     </div>
-                    <span class="text-gray-500 text-xs sm:text-sm flex-shrink-0">${log.timestamp}</span>
+                    <span class="text-gray-500 text-xs sm:text-sm flex-shrink-0">${log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A'}</span>
                 `;
                 auditLogListDiv.appendChild(logItem);
             });
