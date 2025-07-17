@@ -126,6 +126,8 @@ async function initDatabase() {
             console.log("✅ 'user_sessions' table created successfully!");
         } else {
             console.log("✅ 'user_sessions' table already exists.");
+            // Additional check: If table exists, verify schema if possible (more complex for this context)
+            // For now, rely on manual drop/recreate if the error persists.
         }
     } catch (error) {
         console.error("❌ Database initialization failed:", error.message);
