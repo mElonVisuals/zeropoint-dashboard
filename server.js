@@ -230,6 +230,12 @@ passport.use(new DiscordStrategy({
 app.set('trust proxy', 1);
 console.log("[DEBUG] Express 'trust proxy' set to 1.");
 
+// Helper function to log route registration
+function registerRoute(method, path, ...handlers) {
+    console.log(`[DEBUG] Registering route: ${method.toUpperCase()} ${path}`);
+    app[method](path, ...handlers);
+}
+
 // Call database initialization before setting up session middleware and routes
 initDatabase().then(() => {
     app.use(session({
@@ -277,12 +283,12 @@ initDatabase().then(() => {
     }
 
     // --- Routes ---
-    app.get('/login', (req, res, next) => {
+    registerRoute('get', '/login', (req, res, next) => {
         console.log("[DEBUG] /login: Initiating Discord OAuth.");
         passport.authenticate('discord')(req, res, next);
     });
 
-    app.get('/auth/discord/callback',
+    registerRoute('get', '/auth/discord/callback',
         passport.authenticate('discord', { failureRedirect: '/' }),
         (req, res) => {
             console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
@@ -296,18 +302,18 @@ initDatabase().then(() => {
         }
     );
 
-    app.get('/dashboard', checkAuthenticated, (req, res) => {
+    registerRoute('get', '/dashboard', checkAuthenticated, (req, res) => {
         console.log("[DEBUG] Accessing /dashboard. isAuthenticated:", req.isAuthenticated());
         res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
     });
 
-    app.get('/user', checkAuthenticated, (req, res) => {
+    registerRoute('get', '/user', checkAuthenticated, (req, res) => {
         console.log("[DEBUG] Accessing /user. isAuthenticated:", req.isAuthenticated());
         console.log("[DEBUG] /user: Sending user data for ID:", req.user ? req.user.id : 'N/A');
         res.json(req.user);
     });
 
-    app.get('/bot-guilds', checkAuthenticated, async (req, res) => {
+    registerRoute('get', '/bot-guilds', checkAuthenticated, async (req, res) => {
         console.log("[DEBUG] Accessing /bot-guilds. isAuthenticated:", req.isAuthenticated());
         if (!DISCORD_BOT_TOKEN) {
             console.error("[ERROR] /bot-guilds: DISCORD_BOT_TOKEN is not set in environment variables.");
@@ -335,8 +341,7 @@ initDatabase().then(() => {
 
     // --- API ENDPOINTS FOR GUILD SETTINGS (PostgreSQL Integrated) ---
 
-    // GET all settings for a specific guild
-    app.get('/api/guild-settings/:guildId', checkAuthenticated, async (req, res) => {
+    registerRoute('get', '/api/guild-settings/:guildId', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         try {
             const settings = await getGuildSettingsFromDb(guildId);
@@ -347,8 +352,7 @@ initDatabase().then(() => {
         }
     });
 
-    // POST/PUT to update specific setting categories for a guild
-    app.post('/api/guild-settings/:guildId/:settingType', checkAuthenticated, async (req, res) => {
+    registerRoute('post', '/api/guild-settings/:guildId/:settingType', checkAuthenticated, async (req, res) => {
         const { guildId, settingType } = req.params;
         const newSettings = req.body;
 
@@ -375,8 +379,7 @@ initDatabase().then(() => {
     });
 
     // --- Custom Commands API ---
-    // POST to add a custom command
-    app.post('/api/guild-settings/:guildId/custom-commands', checkAuthenticated, async (req, res) => {
+    registerRoute('post', '/api/guild-settings/:guildId/custom-commands', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         const newCommand = req.body;
 
@@ -407,8 +410,7 @@ initDatabase().then(() => {
         }
     });
 
-    // DELETE a custom command by index
-    app.delete('/api/guild-settings/:guildId/custom-commands/:index', checkAuthenticated, async (req, res) => {
+    registerRoute('delete', '/api/guild-settings/:guildId/custom-commands/:index', checkAuthenticated, async (req, res) => {
         const { guildId, index } = req.params;
         const cmdIndex = parseInt(index, 10);
 
@@ -434,8 +436,7 @@ initDatabase().then(() => {
     });
 
     // --- Reaction Roles API ---
-    // POST to add a reaction role
-    app.post('/api/guild-settings/:guildId/reaction-roles', checkAuthenticated, async (req, res) => {
+    registerRoute('post', '/api/guild-settings/:guildId/reaction-roles', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         const newReactionRole = req.body;
 
@@ -461,8 +462,7 @@ initDatabase().then(() => {
         }
     });
 
-    // DELETE a reaction role by index
-    app.delete('/api/guild-settings/:guildId/reaction-roles/:index', checkAuthenticated, async (req, res) => {
+    registerRoute('delete', '/api/guild-settings/:guildId/reaction-roles/:index', checkAuthenticated, async (req, res) => {
         const { guildId, index } = req.params;
         const rrIndex = parseInt(index, 10);
 
@@ -488,8 +488,7 @@ initDatabase().then(() => {
     });
 
     // --- Leveling Rewards API ---
-    // POST to add a leveling reward
-    app.post('/api/guild-settings/:guildId/leveling-rewards', checkAuthenticated, async (req, res) => {
+    registerRoute('post', '/api/guild-settings/:guildId/leveling-rewards', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         const newReward = req.body;
 
@@ -525,8 +524,7 @@ initDatabase().then(() => {
         }
     });
 
-    // DELETE a leveling reward by index
-    app.delete('/api/guild-settings/:guildId/leveling-rewards/:index', checkAuthenticated, async (req, res) => {
+    registerRoute('delete', '/api/guild-settings/:guildId/leveling-rewards/:index', checkAuthenticated, async (req, res) => {
         const { guildId, index } = req.params;
         const rewardIndex = parseInt(index, 10);
 
@@ -552,7 +550,7 @@ initDatabase().then(() => {
     });
 
     // --- Analytics API ---
-    app.get('/api/analytics/:guildId', checkAuthenticated, async (req, res) => {
+    registerRoute('get', '/api/analytics/:guildId', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         try {
             const settings = await getGuildSettingsFromDb(guildId);
@@ -565,7 +563,7 @@ initDatabase().then(() => {
     });
 
     // --- Audit Log API ---
-    app.get('/api/audit-log/:guildId', checkAuthenticated, async (req, res) => {
+    registerRoute('get', '/api/audit-log/:guildId', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         try {
             const settings = await getGuildSettingsFromDb(guildId);
@@ -578,7 +576,7 @@ initDatabase().then(() => {
     });
 
     // --- Announcement API ---
-    app.post('/api/send-announcement/:guildId', checkAuthenticated, async (req, res) => {
+    registerRoute('post', '/api/send-announcement/:guildId', checkAuthenticated, async (req, res) => {
         const { guildId } = req.params;
         const { channelId, embedData } = req.body;
 
@@ -618,7 +616,7 @@ initDatabase().then(() => {
         }
     });
 
-    app.get('/logout', (req, res) => {
+    registerRoute('get', '/logout', (req, res) => {
         console.log("[DEBUG] /logout: Attempting logout for user:", req.user ? req.user.id : 'N/A');
         req.logout((err) => {
             if (err) {
@@ -636,14 +634,14 @@ initDatabase().then(() => {
         });
     });
 
-    app.get('/', (req, res) => {
+    registerRoute('get', '/', (req, res) => {
         console.log("[DEBUG] Accessing / (login page). isAuthenticated:", req.isAuthenticated());
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 
     // Catch-all route for any other requests that don't match, redirect to index.html
     // This should be the very last route defined.
-    app.get('*', (req, res) => {
+    registerRoute('get', '*', (req, res) => {
         console.log(`[DEBUG] Catch-all route for: ${req.path}. Redirecting to /.`);
         res.redirect('/');
     });
