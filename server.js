@@ -277,19 +277,33 @@ initDatabase().then(() => {
             console.log("[DEBUG] checkAuthenticated: API request not authenticated. Sending 401 JSON.");
             return res.status(401).json({ message: 'Unauthorized: Please log in.' });
         } else {
-            console.log("[DEBUG] checkAuthenticated: Non-API request not authenticated. Redirecting to /.");
-            return res.redirect('/');
+            console.log("[DEBUG] checkAuthenticated: Non-API request not authenticated. Redirecting to /login."); // Changed redirect
+            return res.redirect('/login'); // Redirect to the dedicated login page
         }
     }
 
     // --- Routes ---
-    registerRoute('get', '/login', (req, res, next) => {
-        console.log("[DEBUG] /login: Initiating Discord OAuth.");
+
+    // New route for the main homepage (ZeroPoint Bot Landing Page)
+    registerRoute('get', '/', (req, res) => {
+        console.log("[DEBUG] Accessing / (ZeroPoint Bot Homepage).");
+        res.sendFile(path.join(__dirname, 'public', 'homepage.html')); // Serve the new homepage
+    });
+
+    // New route for the dashboard login page
+    registerRoute('get', '/login', (req, res) => {
+        console.log("[DEBUG] Accessing /login (Dashboard Login Page).");
+        res.sendFile(path.join(__dirname, 'public', 'login.html')); // Serve the dashboard login page
+    });
+
+    // Route to initiate Discord OAuth (action from the login page)
+    registerRoute('get', '/auth/discord', (req, res, next) => {
+        console.log("[DEBUG] /auth/discord: Initiating Discord OAuth.");
         passport.authenticate('discord')(req, res, next);
     });
 
     registerRoute('get', '/auth/discord/callback',
-        passport.authenticate('discord', { failureRedirect: '/' }),
+        passport.authenticate('discord', { failureRedirect: '/login' }), // Changed failure redirect
         (req, res) => {
             console.log("[DEBUG] OAuth2 Callback Success. isAuthenticated:", req.isAuthenticated());
             if (req.isAuthenticated()) {
@@ -297,7 +311,7 @@ initDatabase().then(() => {
                 res.redirect('/dashboard');
             } else {
                 console.error("[ERROR] OAuth2 Callback: User not authenticated after successful Passport auth. This should not happen.");
-                res.redirect('/');
+                res.redirect('/login'); // Changed redirect
             }
         }
     );
@@ -634,12 +648,7 @@ initDatabase().then(() => {
         });
     });
 
-    registerRoute('get', '/', (req, res) => {
-        console.log("[DEBUG] Accessing / (login page). isAuthenticated:", req.isAuthenticated());
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
-
-    // Catch-all route for any other requests that don't match, redirect to index.html
+    // Catch-all route for any other requests that don't match, redirect to homepage
     // This should be the very last route defined.
     registerRoute('get', '*', (req, res) => {
         console.log(`[DEBUG] Catch-all route for: ${req.path}. Redirecting to /.`);

@@ -3,58 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroPoint Dashboard Login</title>
+    <title>ZeroPoint Bot</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Inter for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Base Styles */
+        /* Custom Base Styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0A0A0A; /* Deepest dark background */
+            background: #0A0A0A; /* Deepest dark background */
             color: #EAEAEA; /* Soft white text */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden; /* Prevent scrollbars */
+            overflow-x: hidden; /* Prevent horizontal scroll */
             position: relative;
+            z-index: 1;
+            line-height: 1.6;
         }
 
-        /* Animated Background Gradients for depth and liveliness */
+        /* Animated Background Gradients for depth */
         .background-gradient-top {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 60%; /* Increased height */
-            background: radial-gradient(circle at 15% 15%, rgba(95, 158, 160, 0.08) 0%, transparent 60%); /* Increased opacity and spread */
-            animation: moveGradientTop 30s infinite alternate ease-in-out; /* Slower animation */
+            height: 50%;
+            background: radial-gradient(circle at 10% 10%, rgba(95, 158, 160, 0.03) 0%, transparent 50%); /* Reduced opacity */
+            animation: moveGradientTop 25s infinite alternate ease-in-out;
             pointer-events: none;
             z-index: -2;
-            filter: blur(120px); /* Increased blur for smoother effect */
+            filter: blur(100px); /* Increased blur */
         }
         .background-gradient-bottom {
             position: fixed;
             bottom: 0;
             right: 0;
             width: 100%;
-            height: 60%; /* Increased height */
-            background: radial-gradient(circle at 85% 85%, rgba(70, 130, 180, 0.08) 0%, transparent 60%); /* Increased opacity and spread */
-            animation: moveGradientBottom 30s infinite alternate-reverse ease-in-out; /* Slower animation */
+            height: 50%;
+            background: radial-gradient(circle at 90% 90%, rgba(70, 130, 180, 0.03) 0%, transparent 50%); /* Reduced opacity */
+            animation: moveGradientBottom 25s infinite alternate-reverse ease-in-out;
             pointer-events: none;
             z-index: -2;
-            filter: blur(120px); /* Increased blur */
+            filter: blur(100px); /* Increased blur */
         }
 
         @keyframes moveGradientTop {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(10%, 10%) scale(1.1); } /* Added scale for more movement */
-            100% { transform: translate(0, 0) scale(1); }
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(5%, 5%); }
         }
         @keyframes moveGradientBottom {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-10%, -10%) scale(1.1); } /* Added scale for more movement */
-            100% { transform: translate(0, 0) scale(1); }
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-5%, -5%); }
         }
 
         /* Subtle Noise Overlay */
@@ -65,139 +63,236 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0ic3RhbmRhcmROb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC43NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaEF2YWlsYWJsZSIvPjxmZUNvbG9yTWF0cml4IHR5cGU9InNhdHVyYXRlIiB2YWx1ZXM9IjAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNGRkZGRkYiIGZpbHRlcj0idXJsKCNmKSIvPjwvc3ZnPg==');
+            background: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z2kiPjxmaWx0ZXIgaWQ9ImYiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjc1IiBudW1PY3RhdmVzPSIyIiBzdGl0Y2hUaWxlcz0ic3RpdGNoQXZhaWxhYmxlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iI0ZGRkZGRiIgZmlsdGVyPSJ1cmwoI2YpIi8+PC9zdmc=');
             background-size: 100px;
             opacity: 0.01; /* Even more subtle noise */
             z-index: -1;
             pointer-events: none;
         }
 
-        /* Starfield Effect */
-        .starfield {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -3; /* Behind gradients */
-            background: transparent;
-            /* Animation for stars to simulate subtle movement/twinkle */
-            animation: twinkle 150s linear infinite; /* Very slow twinkle */
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1A1A1A;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5F9EA0; /* Cadet Blue accent */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4682B4; /* Steel Blue on hover */
         }
 
-        /* Generate stars using box-shadow */
-        .starfield::before, .starfield::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1px;
-            height: 1px;
-            background: white;
-            border-radius: 50%;
-            /* Increased density and spread of stars */
-            box-shadow:
-                /* Layer 1 - Denser, smaller stars */
-                -200px 100px #fff, 150px 200px #fff, 300px 50px #fff, 400px 250px #fff, -100px 300px #fff,
-                50px 400px #fff, 250px 150px #fff, 350px 350px #fff, -50px 50px #fff, 100px 280px #fff,
-                -300px 180px #fff, 200px 450px #fff, 450px 100px #fff, -250px 220px #fff, 180px 380px #fff,
-                -400px 20px #fff, 500px 120px #fff, -150px 480px #fff, 320px -50px #fff, 80px 520px #fff,
-                -280px 350px #fff, 120px -80px #fff, 550px 280px #fff, -350px 100px #fff, 220px 420px #fff,
-                -10px 10px #eee, 10px 20px #eee, 30px 5px #eee, 40px 25px #eee, -10px 30px #eee,
-                5px 40px #eee, 25px 15px #eee, 35px 35px #eee, -5px 5px #eee, 10px 28px #eee,
-                -30px 18px #eee, 20px 45px #eee, 45px 10px #eee, -25px 22px #eee, 18px 38px #eee,
-                -80px 120px #ddd, 120px 80px #ddd, 280px 180px #ddd, 380px 20px #ddd, -150px 250px #ddd,
-                70px 350px #ddd, 220px 100px #ddd, 320px 300px #ddd, -20px 200px #ddd, 150px 420px #ddd,
-                -220px 50px #ddd, 100px 20px #ddd, 400px 300px #ddd, -80px 380px #ddd, 250px 70px #ddd,
-                /* Layer 2 - Larger, more distant stars */
-                -600px 50px #ccc, 700px 300px #ccc, -400px 600px #ccc, 800px 100px #ccc, -200px 700px #ccc,
-                100px 800px #ccc, 600px 400px #ccc, -500px 200px #ccc, 900px 500px #ccc, -300px 900px #ccc,
-                -750px 250px #bbb, 850px 600px #bbb, -550px 800px #bbb, 950px 350px #bbb, -450px 1000px #bbb,
-                250px 950px #bbb, 700px 750px #bbb, -650px 450px #bbb, 1000px 850px #bbb, -350px 1100px #bbb;
+        /* Keyframe Animations */
+        @keyframes fadeInSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInSlideUp {
+            animation: fadeInSlideUp 0.8s ease-out forwards;
         }
 
-        @keyframes twinkle {
-            0% { transform: translate(0, 0); opacity: 1; }
-            25% { transform: translate(1%, -1%); opacity: 0.9; }
-            50% { transform: translate(0, 0); opacity: 1; }
-            75% { transform: translate(-1%, 1%); opacity: 0.9; }
-            100% { transform: translate(0, 0); opacity: 1; }
+        @keyframes buttonPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0px rgba(95, 158, 160, 0.5); }
+            50% { transform: scale(1.02); box-shadow: 0 0 15px rgba(95, 158, 160, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 0px rgba(95, 158, 160, 0.5); }
+        }
+        .btn-pulse {
+            animation: buttonPulse 2s infinite ease-in-out;
         }
 
-        /* Container Styling */
-        .container-bg {
-            background-color: #1A1A1A; /* Darker background for card */
-            border: 1px solid #3A3A3A; /* Subtle border */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+        @keyframes featureEntry {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .feature-item {
+            opacity: 0; /* Hidden by default, animated by JS */
+            transform: translateY(30px) scale(0.98);
+            transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .feature-item.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: featureEntry 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        /* Discord Button Styling */
-        .btn-discord {
-            background-color: #5865F2; /* Discord brand color */
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        /* Accent text color */
+        .text-accent {
+            color: #5F9EA0; /* Cadet Blue */
+        }
+
+        /* Feature Card Design */
+        .feature-card {
+            background: #1A1A1A; /* Darker grey for cards */
+            border: 1px solid rgba(255, 255, 255, 0.08); /* Very subtle border */
+            border-radius: 0.75rem; /* Rounded corners */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
         }
-        .btn-discord:hover {
-            background-color: #4752C4;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(95, 158, 160, 0.5); /* Accent border on hover */
         }
-        .btn-discord:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Animations */
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fadeInScale {
-            animation: fadeInScale 0.6s ease-out forwards;
+        .feature-icon {
+            color: #5F9EA0; /* Accent color for icons */
+            font-size: 3rem; /* Standard icon size */
+            line-height: 1;
+            margin-bottom: 0.75rem;
         }
 
         /* Logo specific animations and effects */
-        .logo-float {
-            animation: logoFloat 4s ease-in-out infinite;
-        }
         @keyframes logoFloat {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
         }
+        .logo-float {
+            animation: logoFloat 4s ease-in-out infinite;
+        }
+        .logo-shadow-pulse {
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .logo-shadow-pulse:hover {
+            box-shadow: 0 0 25px rgba(95, 158, 160, 0.8), 0 0 40px rgba(70, 130, 180, 0.6);
+        }
     </style>
 </head>
-<body class="p-4">
+<body class="min-h-screen flex flex-col items-center justify-center py-8 px-4">
+
     <div class="background-gradient-top"></div>
     <div class="background-gradient-bottom"></div>
-    <div class="starfield"></div> <!-- New starfield element -->
 
-    <div class="container-bg p-8 rounded-xl shadow-2xl max-w-md w-full text-center animate-fadeInScale relative z-10">
-        <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Logo" class="w-32 h-32 mx-auto mb-6 rounded-full shadow-lg logo-float">
-        <h1 class="text-4xl font-extrabold mb-4 text-white">ZeroPoint Dashboard</h1>
-        <p class="text-gray-300 text-lg mb-6">
-            Manage your ZeroPoint Bot settings, customize features, and streamline your Discord server directly from this intuitive web interface.
+    <!-- Hero Section -->
+    <header class="w-full max-w-4xl text-center py-16 md:py-24 px-4 relative z-10">
+        <img src="https://melonvisuals.me/test/zeropoint.png" alt="ZeroPoint Bot Logo" class="w-36 h-36 md:w-48 md:h-48 mx-auto rounded-full mb-8 border-3 border-accent shadow-lg animate-fadeInSlideUp logo-float logo-shadow-pulse">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight animate-fadeInSlideUp" style="animation-delay: 0.2s;">
+            Elevate Your Discord with <span class="text-accent">ZeroPoint Bot</span>.
+        </h1>
+        <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto animate-fadeInSlideUp" style="animation-delay: 0.4s;">
+            Seamlessly integrate advanced features for community engagement, streamlined commissions, and dynamic content delivery.
         </p>
-        <p class="text-gray-400 text-sm mb-10">
-            Log in securely with your Discord account to get started.
-        </p>
-        <a href="/login" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-full shadow-sm text-white btn-discord">
-            <svg class="w-7 h-7 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20.22 0H3.78A3.78 3.78 0 0 0 0 3.78v16.44A3.78 3.78 0 0 0 3.78 24h16.44A3.78 3.78 0 0 0 24 20.22V3.78A3.78 3.78 0 0 0 20.22 0zM8.34 17.37c-.36.31-.72.31-1.08 0-.36-.31-.36-.62 0-.93.36-.31.72-.31 1.08 0 .36.31.36.62 0 .93zm7.32 0c-.36.31-.72.31-1.08 0-.36-.31-.36-.62 0-.93.36-.31.72-.31 1.08 0 .36.31.36.62 0 .93zM12 10.87c-2.61 0-4.74 2.13-4.74 4.74 0 .31.18.56.49.56h.06c.25 0 .43-.18.49-.43 0-.12.06-.25.06-.37 0-1.87 1.5-3.37 3.37-3.37s3.37 1.5 3.37 3.37c0 .12 0 .25.06.37.06.25.25.43.49.43h.06c.31 0 .49-.25.49-.56 0-2.61-2.13-4.74-4.74-4.74zm4.84-2.81c-.5-.06-.93-.12-1.37-.18-1.5-.25-2.99-.37-4.49-.37-1.5 0-2.99.12-4.49.37-.43.06-.87.12-1.37.18-.31.06-.56.31-.56.62v.06c0 .31.25.56.56.62.43.06.87.12 1.37.18 1.5.25 2.99.37 4.49.37 1.5 0 2.99-.12 4.49-.37.43-.06.87-.12 1.37-.18.31-.06.56-.31.56-.62v-.06c0-.31-.25-.56-.56-.62zM12 3.78c-3.12 0-5.65 2.53-5.65 5.65 0 .31.18.56.49.56h.06c.25 0 .43-.18.49-.43 0-.12.06-.25.06-.37 0-1.87 1.5-3.37 3.37-3.37s3.37 1.5 3.37 3.37c0 .12 0 .25.06.37.06.25.25.43.49.43h.06c.31 0 .49-.25.49-.56 0-3.12-2.53-5.65-5.65-5.65z"/>
-            </svg>
-            Login with Discord
-        </a>
-    </div>
+        <button id="inviteBotBtn" class="bg-accent hover:bg-[#4682B4] text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md focus:outline-none focus:ring-4 focus:ring-accent focus:ring-opacity-50 btn-pulse animate-fadeInSlideUp" style="animation-delay: 0.6s;">
+            🚀 Releasing 2026!
+        </button>
+    </header>
 
-    <!-- Footer for the login page -->
-    <footer class="absolute bottom-4 text-gray-500 text-xs text-center w-full max-w-md">
-        &copy; <span id="current-year-login"></span> ZeroPoint. All rights reserved.
+    <!-- Features Section -->
+    <section class="w-full max-w-4xl py-16 px-4 bg-[#1A1A1A] rounded-xl shadow-lg mb-16 border border-gray-800 relative z-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-12 text-center">Key Features</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Feature 1 -->
+            <div class="feature-item feature-card p-6">
+                <div class="flex flex-col items-center text-center">
+                    <div class="feature-icon">
+                        ✨
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Automated Cinematic Announcements</h3>
+                    <p class="text-gray-400 text-sm leading-normal">Keep your community instantly updated with new ZeroPoint cinematic releases. Our bot delivers rich, eye-catching embeds directly to your designated channels.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-item feature-card p-6">
+                <div class="flex flex-col items-center text-center">
+                    <div class="feature-icon">
+                        👋
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Personalized Member Welcomes</h3>
+                    <p class="text-gray-400 text-sm leading-normal">Greet new members with custom, branded welcome messages, guiding them to essential channels and fostering a warm community.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-item feature-card p-6">
+                <div class="flex flex-col items-center text-center">
+                    <div class="feature-icon">
+                        💡
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Enhanced Community Engagement</h3>
+                    <p class="text-gray-400 text-sm leading-normal">Spark dynamic discussions, gather valuable feedback, and ignite creative brainstorming sessions with intuitive bot commands.</p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-item feature-card p-6">
+                <div class="flex flex-col items-center text-center">
+                    <div class="feature-icon">
+                        🎫
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Seamless Commission Ticket System</h3>
+                    <p class="text-gray-400 text-sm leading-normal">Streamline client inquiries and commission requests with dedicated ticket system integration for professional and private discussions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="w-full max-w-4xl py-16 px-4 text-center bg-[#1A1A1A] rounded-xl shadow-lg mb-16 border border-gray-800 relative z-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-8">Ready to Transform Your Discord?</h2>
+        <p class="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+            Bring the power and sophistication of ZeroPoint directly to your server. Invite the bot and redefine your community's digital experience today.
+        </p>
+        <button id="inviteBotBtnBottom" class="bg-accent hover:bg-[#4682B4] text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md focus:outline-none focus:ring-4 focus:ring-accent focus:ring-opacity-50 btn-pulse">
+            🚀 Releasing 2026
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-6 text-gray-500 text-xs text-center w-full max-w-4xl">
+        &copy; <span id="current-year-footer"></span> ZeroPoint. All rights reserved. | Crafted with passion for the FiveM community.
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('current-year-login').textContent = new Date().getFullYear();
+            // Replace 'YOUR_BOT_INVITE_URL_HERE' with your actual bot invite URL
+            // Since the button says "Releasing 2026!", the URL is currently a placeholder.
+            const inviteUrl = '#';
+
+            const inviteButtons = document.querySelectorAll('#inviteBotBtn, #inviteBotBtnBottom');
+            inviteButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    // Prevent default link behavior if inviteUrl is '#'
+                    if (inviteUrl === '#') {
+                        event.preventDefault();
+                        // Optionally, show a message that it's not released yet
+                        console.log("Bot is releasing in 2026, invite link not active yet.");
+                        // You could add a small temporary message box on the page here
+                    } else {
+                        window.open(inviteUrl, '_blank');
+                    }
+                });
+            });
+
+            // Intersection Observer for feature item animations (scroll reveal)
+            const featureItems = document.querySelectorAll('.feature-item');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1 // Trigger when 10% of the item is visible
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Stop observing once visible
+                    }
+                });
+            }, observerOptions);
+
+            featureItems.forEach((item, index) => {
+                // Add a slight delay to each item for a staggered effect
+                item.style.animationDelay = `${index * 0.1}s`; // Apply delay to the animation
+                observer.observe(item);
+            });
+
+            // Dynamically update current year in the footer
+            document.getElementById('current-year-footer').textContent = new Date().getFullYear();
         });
     </script>
 </body>
